@@ -23,7 +23,7 @@ function pythonHas(mod) {
 }
 
 global.window = global;
-[ 'util.js','segmenter.js','aligner.js','merge.js','docximport.js','exporters.js','sample.js' ]
+[ 'util.js','segmenter.js','srt.js','aligner.js','merge.js','docximport.js','exporters.js','sample.js' ]
   .forEach(f => require(JS(f)));
 const U = PA.util, Seg = PA.Seg, Aligner = PA.Aligner, Merge = PA.Merge, Exp = PA.Export;
 
@@ -113,6 +113,43 @@ d=Document(); d.add_paragraph('这是第一段第一句。这是第一段第二�
   } else skip('DOCX 两段提取（需 python-docx）');
   const gbk = Buffer.from([0xd6, 0xd0, 0xce, 0xc4]);
   ok(PA.Import.decodeText(gbk.buffer.slice(gbk.byteOffset, gbk.byteOffset + gbk.byteLength)) === '中文', 'GBK 编码识别');
+
+  console.log('== 6. SRT 字幕 ==');
+  const sampleSrt = '1\r\n00:00:01,000 --> 00:00:03,500\r\n<i>Hello world.</i>\r\n\r\n2\r\n00:00:04,000 --> 00:00:06,000\r\nSecond line here.\r\n';
+  ok(PA.SRT.looksLikeSrt(sampleSrt), 'looksLikeSrt 识别');
+  const cues = PA.SRT.parse(sampleSrt);
+  ok(cues.length === 2 && cues[0].start === 1000 && cues[0].end === 3500, 'SRT 解析时间与条数（CRLF + 标签清除）');
+  ok(cues[0].text === 'Hello world.', '台词文本：' + cues[0].text);
+  const vttText = 'WEBVTT\n\n00:01.000 --> 00:03.500\n你好世界。\n\n00:04.000 --> 00:06.000\n第二条。\n';
+  const vttCues = PA.SRT.parse(vttText);
+  ok(vttCues.length === 2 && vttCues[0].start === 1000 && vttCues[0].end === 3500, 'VTT 解析（无小时时间戳）');
+  const rt = PA.SRT.parse(PA.SRT.formatGroups(cues.map(c => ({ t0: c.start, t1: c.end, lines: [c.text] }))));
+  ok(rt.length === 2 && rt[1].text === 'Second line here.', 'SRT 生成往返解析');
+  // 时间轴锚定对齐：双语台词各带 ±300ms 内偏移，验证全 1-1
+  const zhCues = [
+    { start: 0, end: 2000, text: '会议定在周一上午九点。' },
+    { start: 2100, end: 4000, text: '请所有人准时参加。' },
+    { start: 4100, end: 6000, text: '会议室在三楼东侧。' },
+    { start: 6100, end: 8000, text: '记得携带笔记本和资料。' },
+    { start: 8100, end: 10000, text: '会后一起吃午饭。' }
+  ];
+  const enCues = [
+    { start: 150, end: 2150, text: 'The meeting is set for Monday morning.' },
+    { start: 2250, end: 4150, text: 'Everyone please be on time.' },
+    { start: 4250, end: 6150, text: 'The meeting room is on the third floor, east side.' },
+    { start: 6250, end: 8150, text: 'Bring your laptop and documents.' },
+    { start: 8250, end: 10150, text: 'Let us have lunch together afterwards.' }
+  ];
+  const toSent = cs => cs.map(c => ({ text: c.text, para: 0, t0: c.start, t1: c.end, len: U.weightedLen(c.text), nums: Seg.extractNums(c.text), tokens: Seg.simTokens(c.text) }));
+  const srtBeads = Aligner.alignTexts(toSent(zhCues), toSent(enCues), { usePara: false, variance: 9, lexWeight: 0, numWeight: 60, srtWeight: 80, sameScript: false });
+  ok(srtBeads.length === 5 && srtBeads.every(b => b.type === '1-1' && b.a[0] === b.b[0]), '时间轴锚定：5 句全 1-1 且下标一一对应');
+  const srtVersions = [{ id: 'zh', name: '中文', lang: 'zh-CN' }, { id: 'en', name: '英文', lang: 'en' }];
+  const srtTus = PA.Merge.buildTUs(srtVersions, 'zh', { zh: toSent(zhCues).map(s => ({ text: s.text, para: 0, t0: s.t0, t1: s.t1 })), en: toSent(enCues).map(s => ({ text: s.text, para: 0, t0: s.t0, t1: s.t1 })) }, [{ vid: 'en', beads: srtBeads }]);
+  PA.SRT.attachTiming(srtTus, 'zh', toSent(zhCues).map(s => ({ text: s.text, para: 0, t0: s.t0, t1: s.t1 })));
+  ok(srtTus.length === 5 && srtTus[0].t0 === 0 && srtTus[4].t1 === 10000, 'TU 时间轴附着（取基准语时间，首尾正确）');
+  const bilingualSrt = Exp.formatSrtGroups(srtTus.map(t => ({ t0: t.t0, t1: t.t1, lines: [t.cells.zh || '', t.cells.en || ''] })));
+  const backCues = PA.SRT.parse(bilingualSrt);
+  ok(backCues.length === 5 && backCues[1].text.includes('Everyone please be on time.') && backCues[1].text.includes('请所有人准时参加。'), '双语 SRT 导出往返解析');
 
   console.log(`\n结果：${passed} 通过 / ${failed} 失败` + (skipped ? ` / ${skipped} 跳过` : ''));
   process.exit(failed ? 1 : 0);

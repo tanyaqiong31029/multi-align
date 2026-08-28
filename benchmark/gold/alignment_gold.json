@@ -115,6 +115,31 @@
       "gold": [[["0"],["0"]], [["1"],["1"]], [["2"],["2"]], [["3"],["3"]], [["4"],["4"]], [["5"],["5"]], [["6"],["6"]], [["7"],["7"]], [["8"],["8"]], [["9"],["9"]]]
     },
     {
+      "id": "zh-en-srt",
+      "note": "字幕时间轴锚点：台词各带 ±300ms 偏移，英文第 2 条合并中文两条（1-2），靠时间重合度对齐",
+      "srt": true,
+      "source": { "lang": "zh-CN", "sentences": [
+        "大家晚上好，欢迎回来。",
+        "今天我们聊一个轻松的话题。",
+        "也就是每个人的睡眠习惯。",
+        "有人习惯早睡早起。",
+        "有人偏爱深夜工作。",
+        "你的睡眠类型是什么？"
+      ], "timing": [
+        [0, 2000], [2100, 4000], [4100, 6000], [6100, 8000], [8100, 10000], [10100, 12000]
+      ] },
+      "target": { "lang": "en", "sentences": [
+        "Good evening, and welcome back.",
+        "Today we are talking about something relaxing: everyone's sleep habits.",
+        "Some people like to go to bed early and get up early.",
+        "Others prefer working late at night.",
+        "What is your sleep type?"
+      ], "timing": [
+        [150, 2150], [2250, 6150], [6250, 8150], [8250, 10150], [10250, 12150]
+      ] },
+      "gold": [[["0"],["0"]], [["1","2"],["1"]], [["3"],["2"]], [["4"],["3"]], [["5"],["4"]]]
+    },
+    {
       "id": "zh-ja-kanji",
       "note": "中↔日 1-1，启用共享汉字词汇相似度通道",
       "source": { "lang": "zh-CN", "sentences": [

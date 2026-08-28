@@ -231,7 +231,31 @@ PA.Export = (function () {
     return makeZip(files);
   }
 
+  /* ---------- SRT 字幕 ---------- */
+  /* groups: [{t0, t1, lines:[各语言一行]}]（时间取自基准语，由 PA.SRT.attachTiming 附着） */
+  function formatSrtGroups(groups) {
+    const msToTs = PA.SRT && PA.SRT.msToTs;
+    if (!msToTs) throw new Error('SRT 模块未加载');
+    return groups
+      .filter(g => g.t0 !== undefined && g.t1 !== undefined && g.lines.some(l => l !== ''))
+      .map((g, i) => (i + 1) + '\n' + msToTs(g.t0) + ' --> ' + msToTs(g.t1) + '\n' +
+        g.lines.filter(l => l !== '').join('\n'))
+      .join('\n\n') + '\n';
+  }
+
+  /* 多语合并字幕 + 各语言单语字幕，打包 ZIP */
+  function buildSrtsZip(groups, versions, base) {
+    const name = U.sanitizeName(base);
+    const files = [{ name: name + '_多语字幕.srt', data: formatSrtGroups(groups) }];
+    versions.forEach((v, i) => {
+      const mono = groups.map(g => ({ t0: g.t0, t1: g.t1, lines: [g.lines[i]] }));
+      files.push({ name: name + '_' + U.sanitizeName(v.name) + '.srt', data: formatSrtGroups(mono) });
+    });
+    return makeZip(files);
+  }
+
   return {
-    xmlEsc, buildTMX, makeZip, buildXLSX, buildDelimited, buildTXT, buildPairwiseZip
+    xmlEsc, buildTMX, makeZip, buildXLSX, buildDelimited, buildTXT, buildPairwiseZip,
+    formatSrtGroups, buildSrtsZip
   };
 })();

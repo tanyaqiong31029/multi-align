@@ -12,7 +12,7 @@
     step: 1,
     versions: [],            // {id, name, lang, text}
     pivotId: null,
-    settings: { usePara: true, splitSemi: false, lexWeight: 40, numWeight: 60, variance: 0 },
+    settings: { usePara: true, splitSemi: false, lexWeight: 40, numWeight: 60, variance: 0, srtWeight: 80 },
     segs: {},                // vid -> [{text, para}]
     tus: [],                 // {cells:{vid:text}, conf, locked, modified}
     alignMeta: null,
@@ -62,9 +62,11 @@
     el.setSplitSemi = E('setSplitSemi');
     el.setLexWeight = E('setLexWeight');
     el.setNumWeight = E('setNumWeight');
+    el.setSrtWeight = E('setSrtWeight');
     el.setVariance = E('setVariance');
     el.lexWeightVal = E('lexWeightVal');
     el.numWeightVal = E('numWeightVal');
+    el.srtWeightVal = E('srtWeightVal');
     el.runAlignBtn = E('runAlignBtn');
     el.alignLog = E('alignLog');
     el.alignProgressBar = E('alignProgressBar');
@@ -199,6 +201,7 @@
       if (e.target.classList.contains('vname')) { v.name = e.target.value; }
       else if (e.target.classList.contains('vtext')) {
         v.text = e.target.value;
+        if (v.cues) { v.cues = null; } // 手工编辑使字幕时间轴失效
         if (state.tus.length) markDirty();
         scheduleStats(vid, card);
       }
@@ -218,6 +221,17 @@
         e.target.value = '';
       }
     });
+    el.vlist.addEventListener('paste', e => {
+      const ta = e.target.closest('.vtext');
+      if (!ta) return;
+      const pasted = e.clipboardData ? e.clipboardData.getData('text') : '';
+      if (!pasted || !PA.SRT.looksLikeSrt(pasted)) return;
+      e.preventDefault();
+      const card = ta.closest('.vcard');
+      const v = byId(card.dataset.vid);
+      if (v) { applySrtToVersion(v, pasted, '粘贴的字幕', card); updateStep1Bar(); }
+    });
+
     el.vlist.addEventListener('click', e => {
       const del = e.target.closest('.vdel');
       if (del) {
@@ -279,7 +293,7 @@
       '<div class="vcard-pivot"><label><input type="radio" class="vpivot" name="pivotRadio"' + (isPivot ? ' checked' : '') + '> 设为基准语' + (isPivot ? '（当前）' : '') + '</label></div>' +
       '<textarea class="vtext" placeholder="粘贴该语言文本…（也可点击下方“导入文件”，支持 txt / md / docx）"></textarea>' +
       '<div class="vcard-foot">' +
-      '<label class="file-btn">导入文件<input type="file" class="vfile" accept=".txt,.md,.docx,.csv" hidden></label>' +
+      '<label class="file-btn">导入文件<input type="file" class="vfile" accept=".txt,.md,.docx,.csv,.srt,.vtt" hidden></label>' +
       '<span class="vstats" data-stats>0 字符</span>' +
       '</div></div>';
   }
@@ -311,6 +325,11 @@
     const span = card.querySelector('[data-stats]'); if (!span) return;
     const text = v.text || '';
     if (!text.trim()) { span.textContent = '0 字符'; return; }
+    if (v.cues && v.cues.length) {
+      const dur = Math.max(0, Math.round((v.cues[v.cues.length - 1].end - v.cues[0].start) / 60000));
+      span.textContent = '🎬 ' + v.cues.length + ' 条台词 · 约 ' + dur + ' 分钟';
+      return;
+    }
     const sents = Seg.segmentRich(text, v.lang, state.settings);
     const paras = text.replace(/\r\n?/g, '\n').split(/\n[ \t]*\n+/).filter(p => p.trim()).length;
     span.textContent = U.fmt(text.length) + ' 字符 · ' + paras + ' 段 · 约 ' + U.fmt(sents.length) + ' 句';
@@ -331,9 +350,20 @@
 
   async function importFileToVersion(v, file, card) {
     try {
-      const r = await Imp.readAny(file);
+      const name = (file.name || '').toLowerCase();
+      let r;
+      if (name.endsWith('.srt') || name.endsWith('.vtt')) {
+        r = { text: await Imp.readTextFile(file), type: 'srt' };
+      } else {
+        r = await Imp.readAny(file);
+      }
       let text = (r.text || '').replace(/\u00a0/g, ' ');
       if (!text.trim()) { toast('文件内容为空', 'warn'); return; }
+      if (PA.SRT.looksLikeSrt(text)) {
+        applySrtToVersion(v, text, file.name, card);
+        updateStep1Bar();
+        return;
+      }
       v.text = text;
       card.querySelector('.vtext').value = text;
       const det = Seg.detectLang(text);
@@ -350,6 +380,22 @@
     } catch (err) {
       toast('导入失败：' + (err && err.message || err), 'err');
     }
+  }
+
+  /* 字幕文件 → 版本：解析时间轴，正文以 cue 文本按行重建 */
+  function applySrtToVersion(v, rawText, fname, card) {
+    const cues = PA.SRT.parse(rawText);
+    if (!cues.length) { toast('字幕解析失败或没有有效台词', 'warn'); return; }
+    v.cues = cues;
+    v.text = cues.map(c => c.text).join('\n');
+    if (card) card.querySelector('.vtext').value = v.text;
+    const det = Seg.detectLang(v.text);
+    if (det && det !== v.lang && card) { v.lang = det; card.querySelector('.vlang').value = det; }
+    const dur = Math.round((cues[cues.length - 1].end - cues[0].start) / 60000);
+    toast('已导入字幕 ' + fname + '：' + cues.length + ' 条台词' + (dur > 0 ? '，约 ' + dur + ' 分钟' : ''), 'ok');
+    if (state.tus.length) markDirty();
+    if (card) scheduleStats(v.id, card, true);
+    autosave();
   }
 
   function loadSample() {
@@ -385,6 +431,10 @@
       state.settings.numWeight = +el.setNumWeight.value;
       el.numWeightVal.textContent = el.setNumWeight.value;
     });
+    el.setSrtWeight.addEventListener('input', () => {
+      state.settings.srtWeight = +el.setSrtWeight.value;
+      el.srtWeightVal.textContent = el.setSrtWeight.value;
+    });
     el.setVariance.addEventListener('change', () => state.settings.variance = +el.setVariance.value || 0);
     el.backTo1Btn.addEventListener('click', () => setStep(1));
     el.runAlignBtn.addEventListener('click', () => runAlignment());
@@ -398,10 +448,12 @@
     state.versions = act;
     if (!state.pivotId || !byId(state.pivotId)) state.pivotId = state.versions[0].id;
     state.versions.forEach((v, i) => { if (!v.name.trim()) v.name = '版本' + (i + 1); });
-    // 重新分句（设置可能变化）
+    // 重新分句（设置可能变化）；字幕版本直接以 cue 为句子单位并携带时间轴
     state.segs = {};
     for (const v of state.versions) {
-      state.segs[v.id] = Seg.segmentRich(v.text, v.lang, state.settings);
+      state.segs[v.id] = (v.cues && v.cues.length)
+        ? v.cues.map(c => ({ text: c.text, para: 0, t0: c.start, t1: c.end }))
+        : Seg.segmentRich(v.text, v.lang, state.settings);
     }
     const emptyOnes = state.versions.filter(v => !state.segs[v.id].length);
     if (emptyOnes.length) {
@@ -416,15 +468,18 @@
     el.step2Chips.innerHTML = state.versions.map(v => {
       const g = Seg.langInfo(v.lang);
       const n = (state.segs[v.id] || []).length;
+      const hasT = (state.segs[v.id] || [{}])[0].t0 !== undefined;
       return '<span class="chip' + (v.id === state.pivotId ? ' chip-pivot' : '') + '">' +
         '<span class="chip-dot" style="background:' + colColor(v.id) + '"></span>' +
         esc(v.name) + '<em>' + esc(g.name) + '</em><b>' + U.fmt(n) + ' 句</b>' +
+        (hasT ? '<i>🎬 时间轴</i>' : '') +
         (v.id === state.pivotId ? '<i>基准语</i>' : '') + '</span>';
     }).join('');
     el.setUsePara.checked = !!state.settings.usePara;
     el.setSplitSemi.checked = !!state.settings.splitSemi;
     el.setLexWeight.value = state.settings.lexWeight; el.lexWeightVal.textContent = state.settings.lexWeight;
     el.setNumWeight.value = state.settings.numWeight; el.numWeightVal.textContent = state.settings.numWeight;
+    el.setSrtWeight.value = state.settings.srtWeight; el.srtWeightVal.textContent = state.settings.srtWeight;
     el.setVariance.value = state.settings.variance || 0;
   }
 
@@ -461,7 +516,8 @@
         text: s.text, para: s.para,
         len: U.weightedLen(s.text),
         nums: Seg.extractNums(s.text),
-        tokens: Seg.simTokens(s.text)
+        tokens: Seg.simTokens(s.text),
+        t0: s.t0, t1: s.t1
       }));
     }
     const pS = prep[pivot.id];
@@ -474,11 +530,13 @@
       const v = others[k];
       const s = prep[v.id];
       const g = Seg.langGroup(v.lang);
+      const bothSrt = (pS[0] || {}).t0 !== undefined && (s[0] || {}).t0 !== undefined;
       const o = {
         usePara: state.settings.usePara,
         variance: state.settings.variance > 0 ? state.settings.variance : Seg.autoVariance(gPivot, g),
         lexWeight: Seg.lexCompatible(gPivot, g) ? state.settings.lexWeight : 0,
         numWeight: state.settings.numWeight,
+        srtWeight: bothSrt ? state.settings.srtWeight : 0,
         sameScript: Seg.lexCompatible(gPivot, g)
       };
       const t1 = performance.now();
@@ -494,6 +552,7 @@
     let tus;
     try {
       tus = Merge.buildTUs(versions, pivot.id, state.segs, pairResults);
+      PA.SRT.attachTiming(tus, pivot.id, state.segs[pivot.id]); // 字幕版本：为 TU 附基准语时间轴
     } catch (err) {
       toast('合并失败：' + (err && err.message || err), 'err');
       endAlign();
@@ -1234,6 +1293,14 @@
     el.exportPreview.innerHTML = html;
   }
 
+  /* TU 行 → SRT 字幕组（时间取自基准语，由 attachTiming 附着） */
+  function srtGroups(rows) {
+    return rows.map(r => ({
+      t0: r.tu.t0, t1: r.tu.t1,
+      lines: versions.map(v => (r.tu.cells[v.id] || '').trim())
+    })).filter(g => g.t0 !== undefined && g.t1 !== undefined && g.lines.some(l => l !== ''));
+  }
+
   function doExport(kind) {
     if (!state.tus.length) { toast('暂无对齐结果', 'warn'); return; }
     const rows = exportRows();
@@ -1248,6 +1315,20 @@
         const zip = Exp.buildPairwiseZip(versions, state.pivotId, rows, o);
         if (!zip) { toast('只有一个版本，无法生成两两 TMX', 'warn'); return; }
         U.download(base + '_两两TMX.zip', zip);
+      } else if (kind === 'srt') {
+        if ((state.segs[state.pivotId] || [{}])[0].t0 === undefined) {
+          toast('当前对齐无时间轴：请让基准语使用字幕文件（SRT/VTT）导入', 'warn'); return;
+        }
+        const groups = srtGroups(rows);
+        if (!groups.length) { toast('没有可导出的字幕行', 'warn'); return; }
+        U.download(base + '_多语字幕.srt', new Blob([Exp.formatSrtGroups(groups)], { type: 'application/x-subrip;charset=utf-8' }));
+      } else if (kind === 'srtzip') {
+        if ((state.segs[state.pivotId] || [{}])[0].t0 === undefined) {
+          toast('当前对齐无时间轴：请让基准语使用字幕文件（SRT/VTT）导入', 'warn'); return;
+        }
+        const groups = srtGroups(rows);
+        if (!groups.length) { toast('没有可导出的字幕行', 'warn'); return; }
+        U.download(base + '_字幕SRT.zip', Exp.buildSrtsZip(groups, versions, base));
       } else if (kind === 'xlsx') {
         U.download(base + '.xlsx', Exp.buildXLSX(versions, rows, o));
       } else if (kind === 'csv') {
@@ -1304,7 +1385,7 @@
       id: v.id || U.uid('v'), name: v.name || '版本', lang: v.lang || 'en', text: v.text || ''
     }));
     state.pivotId = data.pivotId && byId(data.pivotId) ? data.pivotId : (state.versions[0] && state.versions[0].id);
-    state.settings = Object.assign({ usePara: true, splitSemi: false, lexWeight: 40, numWeight: 60, variance: 0 }, data.settings || {});
+    state.settings = Object.assign({ usePara: true, splitSemi: false, lexWeight: 40, numWeight: 60, variance: 0, srtWeight: 80 }, data.settings || {});
     state.tus = Array.isArray(data.tus) ? data.tus : [];
     state.segs = {};
     state.undo = []; state.redo = []; state.search = null;

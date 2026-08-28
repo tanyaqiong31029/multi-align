@@ -36,13 +36,14 @@ global.window = global;
 const U = PA.util, Seg = PA.Seg, Aligner = PA.Aligner;
 
 /* 与 app.js 相同的对齐参数策略（基准在此定义上调用生产逻辑） */
-function alignOptions(srcLang, tgtLang) {
-  const gS = Seg.langGroup(srcLang), gT = Seg.langGroup(tgtLang);
+function alignOptions(c) {
+  const gS = Seg.langGroup(c.source.lang), gT = Seg.langGroup(c.target.lang);
   return {
     usePara: true,
     variance: Seg.autoVariance(gS, gT),
     lexWeight: Seg.lexCompatible(gS, gT) ? 40 : 0,
     numWeight: 60,
+    srtWeight: (c.srt && c.source.timing && c.target.timing) ? 80 : 0,
     sameScript: Seg.lexCompatible(gS, gT)
   };
 }
@@ -62,10 +63,17 @@ let sumP = 0, sumR = 0, nScored = 0;
 
 for (const c of gold.cases) {
   const r = { id: c.id, note: c.note || '' };
-  const textS = buildText(c.source.sentences, c.source.lang, c.paraGroups);
-  const textT = buildText(c.target.sentences, c.target.lang, c.paraGroups);
-  const segS = Seg.segmentRich(textS, c.source.lang, { usePara: true });
-  const segT = Seg.segmentRich(textT, c.target.lang, { usePara: true });
+  let segS, segT;
+  if (c.srt) {
+    // 字幕用例：台词即句子并携带时间轴，不经分句器
+    segS = c.source.sentences.map((t, i) => ({ text: t, para: 0, t0: c.source.timing[i][0], t1: c.source.timing[i][1] }));
+    segT = c.target.sentences.map((t, i) => ({ text: t, para: 0, t0: c.target.timing[i][0], t1: c.target.timing[i][1] }));
+  } else {
+    const textS = buildText(c.source.sentences, c.source.lang, c.paraGroups);
+    const textT = buildText(c.target.sentences, c.target.lang, c.paraGroups);
+    segS = Seg.segmentRich(textS, c.source.lang, { usePara: true });
+    segT = Seg.segmentRich(textT, c.target.lang, { usePara: true });
+  }
 
   if (segS.length !== c.source.sentences.length || segT.length !== c.target.sentences.length) {
     r.status = 'segmentation-fail';
@@ -80,9 +88,10 @@ for (const c of gold.cases) {
 
   const prep = segs => segs.map(s => ({
     text: s.text, para: s.para,
-    len: U.weightedLen(s.text), nums: Seg.extractNums(s.text), tokens: Seg.simTokens(s.text)
+    len: U.weightedLen(s.text), nums: Seg.extractNums(s.text), tokens: Seg.simTokens(s.text),
+    t0: s.t0, t1: s.t1
   }));
-  const beads = Aligner.alignTexts(prep(segS), prep(segT), alignOptions(c.source.lang, c.target.lang));
+  const beads = Aligner.alignTexts(prep(segS), prep(segT), alignOptions(c));
 
   const predicted = new Set(beads.map(b => beadKey(b.a, b.b)));
   const goldSet = new Set(c.gold.map(g => beadKey(g[0].map(Number), g[1].map(Number))));

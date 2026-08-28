@@ -81,6 +81,18 @@ PA.Aligner = (function () {
         else { tb = new Set(); for (let x = j; x < nj; x++) B[x].tokens.forEach(v => tb.add(v)); }
         c -= o.lexWeight * dice(ta, tb);
       }
+      /* 时间轴锚点（字幕）：珠内句子跨度的时间重合度 IoU。
+       * 只在两侧句子都带 t0/t1 时生效，对 1-2/2-1 同样按合并跨度计算。 */
+      if (o.srtWeight > 0 && ni > i && nj > j &&
+          A[i].t0 !== undefined && A[ni - 1].t1 !== undefined &&
+          B[j].t0 !== undefined && B[nj - 1].t1 !== undefined) {
+        let a0 = Infinity, a1 = -Infinity, b0 = Infinity, b1 = -Infinity;
+        for (let x = i; x < ni; x++) { a0 = Math.min(a0, A[x].t0); a1 = Math.max(a1, A[x].t1); }
+        for (let x = j; x < nj; x++) { b0 = Math.min(b0, B[x].t0); b1 = Math.max(b1, B[x].t1); }
+        const inter = Math.min(a1, b1) - Math.max(a0, b0);
+        const union = Math.max(a1, b1) - Math.min(a0, b0);
+        if (union > 0) c -= o.srtWeight * (inter / union);
+      }
       return c;
     }
 

@@ -39,6 +39,7 @@
         支持 5–10 个版本的多语对齐，一次生成全部语言对照表。</p>
       <div class="hero-tags">
         <span class="hero-tag">🌍 中 / 英 / 日 / 韩 / 法 / 德 / 西 / 俄 / 阿 / 泰 / 越 …</span>
+        <span class="hero-tag">🎬 SRT 字幕双语对齐</span>
         <span class="hero-tag">🧩 自动 1-1 / 1-2 / 2-1 句对齐</span>
         <span class="hero-tag">🔒 数据不出浏览器</span>
       </div>
@@ -111,7 +112,7 @@
     <div class="step-pane pane-on" id="pane1">
       <div class="pane-head">
         <h2>第一步 · 导入各版本文本</h2>
-        <p>添加同一文本的 2–10 个语言版本（推荐 5–10 个）。可粘贴文本，或导入 txt / md / docx 文件；选择一个版本作为<strong>基准语</strong>（其他语言均与它对齐）。</p>
+        <p>添加同一文本的 2–10 个语言版本（推荐 5–10 个）。可粘贴文本，或导入 txt / md / docx / <strong>SRT・VTT 字幕</strong>文件；选择一个版本作为<strong>基准语</strong>（其他语言均与它对齐）。</p>
       </div>
       <div class="pane-toolbar">
         <button class="btn" id="btnSample">📚 载入多语示例</button>
@@ -163,6 +164,11 @@
             <label>词汇相似度权重 <input type="range" id="setLexWeight" min="0" max="100" value="40">
               <span class="slider-val" id="lexWeightVal">40</span></label>
             <div class="set-desc">仅在兼容文种间生效（如中↔日共享汉字、西文之间共享词汇），跨文种自动禁用。</div>
+          </div>
+          <div class="set-item">
+            <label>时间轴锚点权重 <input type="range" id="setSrtWeight" min="0" max="100" value="80">
+              <span class="slider-val" id="srtWeightVal">80</span></label>
+            <div class="set-desc">当两个版本都以字幕文件（SRT/VTT）导入时启用：台词时间重合度是最可靠的对齐信号，一般保持 80。</div>
           </div>
           <div class="set-item">
             <label>长度方差（0 = 自动） <input type="number" id="setVariance" min="0" max="50" step="0.1" value="0"></label>
@@ -286,6 +292,12 @@
         <div class="exp-card"><span class="exp-ico">🔁</span><h4>TMX · 两两双语版</h4>
           <p>基准语 × 每个其他语言各生成一个双语 TMX，打包为 ZIP，适合传统 CAT 工作流。</p>
           <button class="btn btn-primary" data-export="tmxzip">导出 .zip</button></div>
+        <div class="exp-card"><span class="exp-ico">🎬</span><h4>SRT 字幕</h4>
+          <p>多语合并字幕（每条台词多行对照）+ 各语言单语字幕打包；时间轴取自基准语字幕。</p>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-primary" data-export="srt">合并 .srt</button>
+            <button class="btn" data-export="srtzip">ZIP 全套</button>
+          </div></div>
         <div class="exp-card"><span class="exp-ico">📊</span><h4>Excel 工作簿</h4>
           <p>.xlsx 表格：行号 + 各版本列（+ 置信度），便于团队协作与二次加工。</p>
           <button class="btn btn-primary" data-export="xlsx">导出 .xlsx</button></div>
@@ -327,10 +339,18 @@
       <li>“一句一行”的文本也可以直接使用——此时每行即一个句子。</li>
     </ul>
 
-    <h2>二、选择基准语</h2>
+    <h2>三、选择基准语</h2>
     <p>基准语（pivot）是所有其他版本的对齐参照，通常是<strong>原文</strong>。例如：中文原文 + 英、日、法、德、西 5 个译本，则以中文为基准语，5 个译本分别与中文对齐后合并成 6 列对照表。</p>
 
-    <h2>三、理解对齐结果</h2>
+    <h2>二、字幕对齐（SRT / VTT）</h2>
+    <ul>
+      <li>把同一视频的<strong>两个语言字幕文件</strong>（如中文 .srt + 英文 .srt）分别导入为两个版本，工具会按台词时间轴自动对齐——时间重合度是最可靠的锚点。</li>
+      <li>粘贴字幕文本也能被自动识别（含 <code>--&gt;</code> 时间轴即视为字幕）；解析时自动清除 <code>&lt;i&gt;</code> 等标签。</li>
+      <li>对齐后可导出<strong>多语合并字幕</strong>（每条台词多行对照，播放器可直接挂载）或各语言单语字幕的 ZIP；时间轴取自基准语。</li>
+      <li>字幕版本建议整部或按章节成对导入；两种字幕若时间轴偏移较大（不同帧率），可在第二步调低「时间轴锚点权重」后重新对齐。</li>
+    </ul>
+
+    <h2>四、理解对齐结果</h2>
     <ul>
       <li>每一行是一个<strong>翻译单元（TU）</strong>，各列为对应语言的句子。</li>
       <li>某版本一句对基准语两句时，两句会自动拼接放入同一单元格（1-2 对齐）。</li>
@@ -338,7 +358,7 @@
       <li>单元格为空表示该语言在此处没有对应内容（漏译或原文独有）。</li>
     </ul>
 
-    <h2>四、审校操作</h2>
+    <h2>五、审校操作</h2>
     <ul>
       <li><strong>编辑文字</strong>：单击单元格直接输入；Tab 跳到下一格，Enter 换行。</li>
       <li><strong>行操作</strong>：点选行号所在行后，使用工具栏「合并下行 / 插行 / 删行 / 上移下移」。</li>
@@ -348,7 +368,7 @@
       <li><strong>撤销 / 重做</strong>：Ctrl+Z / Ctrl+Y。</li>
     </ul>
 
-    <h2>五、导出</h2>
+    <h2>六、导出</h2>
     <ul>
       <li><strong>TMX 多语言版</strong>：符合 TMX 1.4 规范，一个 &lt;tu&gt; 内含所有语言的 &lt;tuv&gt;；OmegaT、Trados、memoQ 等均支持。</li>
       <li><strong>两两 TMX（ZIP）</strong>：基准语 × 每个译本各一个双语 TMX 文件，方便分发给不同语向的团队。</li>
@@ -356,7 +376,7 @@
       <li><strong>TXT</strong>：制表符分隔的平行文本，可直接用于 MT 训练流水线。</li>
     </ul>
 
-    <h2>六、常见问题</h2>
+    <h2>七、常见问题</h2>
     <h3>对齐错了怎么办？</h3>
     <p>先用「只看低置信度」筛出可疑行，用合并 / 拆分 / 清空手工修正；长文本建议确保各版本段落数一致以启用段落锚定。</p>
     <h3>为什么某个版本整列都是空？</h3>
@@ -445,6 +465,7 @@
 
 <script src="js/util.js"></script>
 <script src="js/segmenter.js"></script>
+<script src="js/srt.js"></script>
 <script src="js/aligner.js"></script>
 <script src="js/merge.js"></script>
 <script src="js/docximport.js"></script>
