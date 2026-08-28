@@ -1,0 +1,185 @@
+{
+  "version": 1,
+  "description": "MultiAlign 金标准句对齐基准。sentences 为人工切好的句子序列（脚本会拼接后用生产分句器重切并断言一致）；gold 为句对珠（bead）标注，a=源句下标数组，b=目标句下标数组，覆盖 1-1 / 1-2 / 2-1 / 1-0 / 0-1 全部类型；paraGroups 可选，按段落分组句子下标以触发段落锚定。",
+  "cases": [
+    {
+      "id": "zh-en-basic",
+      "note": "中↔英基础 1-1，12 句，长度比例失衡场景",
+      "source": { "lang": "zh-CN", "sentences": [
+        "城市化给人们带来了便利，也带来了新的挑战。",
+        "越来越多的人搬到大城市寻找工作机会。",
+        "住房紧张和交通拥堵成为普遍问题。",
+        "许多城市开始限制机动车的数量。",
+        "公共交通系统的改善缓解了部分压力。",
+        "地铁线路的不断延伸方便了郊区居民。",
+        "共享单车的出现改变了短途出行的习惯。",
+        "人们也越来越关注空气质量和绿地面积。",
+        "城市公园成为市民休闲的好去处。",
+        "政府投入大量资金用于绿化建设。",
+        "屋顶花园和垂直绿化逐渐流行起来。",
+        "一座宜居的城市需要每个人的参与。"
+      ] },
+      "target": { "lang": "en", "sentences": [
+        "Urbanization has brought convenience to people, as well as new challenges.",
+        "More and more people move to big cities in search of job opportunities.",
+        "Housing shortage and traffic congestion have become common problems.",
+        "Many cities have begun to limit the number of motor vehicles.",
+        "Improvements in public transportation have relieved some of the pressure.",
+        "The continuous extension of subway lines has made life easier for suburban residents.",
+        "The emergence of shared bikes has changed the habit of short-distance travel.",
+        "People are also paying more and more attention to air quality and green space.",
+        "City parks have become a good place for citizens to relax.",
+        "The government has invested a large amount of money in greening projects.",
+        "Roof gardens and vertical greening are gradually becoming popular.",
+        "A livable city requires the participation of everyone."
+      ] },
+      "gold": [[["0"],["0"]], [["1"],["1"]], [["2"],["2"]], [["3"],["3"]], [["4"],["4"]], [["5"],["5"]], [["6"],["6"]], [["7"],["7"]], [["8"],["8"]], [["9"],["9"]], [["10"],["10"]], [["11"],["11"]]]
+    },
+    {
+      "id": "zh-en-merge",
+      "note": "2-1 合并：英文将中文前两句合并为一句",
+      "source": { "lang": "zh-CN", "sentences": [
+        "春天来了，天气渐渐变暖。",
+        "公园里的樱花开满了枝头。",
+        "周末的公园特别热闹。",
+        "孩子们在草地上放风筝。",
+        "老人们在树荫下下棋聊天。",
+        "年轻人喜欢在湖边拍照。",
+        "樱花的花期只有两个星期。",
+        "大家都珍惜这段美好的时光。"
+      ] },
+      "target": { "lang": "en", "sentences": [
+        "Spring has come, the weather is getting warmer, and cherry blossoms are in full bloom in the park.",
+        "The park is especially lively on weekends.",
+        "Children are flying kites on the grass.",
+        "Old people play chess and chat in the shade of the trees.",
+        "Young people like to take photos by the lake.",
+        "The cherry blossom season lasts only two weeks.",
+        "Everyone cherishes this beautiful time."
+      ] },
+      "gold": [[["0","1"],["0"]], [["2"],["1"]], [["3"],["2"]], [["4"],["3"]], [["5"],["4"]], [["6"],["5"]], [["7"],["6"]]]
+    },
+    {
+      "id": "en-fr-split",
+      "note": "1-2 拆分：法文将英文第 5 句拆为两句",
+      "source": { "lang": "en", "sentences": [
+        "The university library opened at nine in the morning.",
+        "Students rushed in to find a good seat.",
+        "The reading room was quiet and full of sunlight.",
+        "Some were preparing for the final exams.",
+        "Others were writing their term papers while looking for new references.",
+        "A new coffee corner was opened last month.",
+        "It quickly became the most popular spot in the library.",
+        "Many good ideas were born in that small corner."
+      ] },
+      "target": { "lang": "fr", "sentences": [
+        "La bibliothèque universitaire a ouvert à neuf heures du matin.",
+        "Les étudiants se sont précipités pour trouver une bonne place.",
+        "La salle de lecture était calme et pleine de soleil.",
+        "Certains préparaient les examens finaux.",
+        "D'autres rédigeaient leurs mémoires.",
+        "En même temps, ils cherchaient de nouvelles références.",
+        "Un nouveau coin café a ouvert le mois dernier.",
+        "Il est vite devenu l'endroit le plus populaire de la bibliothèque.",
+        "Beaucoup de bonnes idées sont nées dans ce petit coin."
+      ] },
+      "gold": [[["0"],["0"]], [["1"],["1"]], [["2"],["2"]], [["3"],["3"]], [["4"],["4","5"]], [["5"],["6"]], [["6"],["7"]], [["7"],["8"]]]
+    },
+    {
+      "id": "en-de-numbers",
+      "note": "数字锚点通道：10 句全部含数字/年份/小数（含德语小数逗号 1,2 ↔ 英语 1.2），检验跨语种数字对齐",
+      "source": { "lang": "en", "sentences": [
+        "In 2019, the city launched a new recycling program.",
+        "By 2021, over 30000 households had joined.",
+        "The city collected 5200 tons of paper every year.",
+        "Glass containers are emptied every 14 days.",
+        "Residents receive a small refund of 10 euros per month.",
+        "In 2023, the program won a national award.",
+        "More than 40 cities copied the model.",
+        "The budget for 2024 is 1.2 million euros.",
+        "Officials expect 5000 new participants next year.",
+        "The target for 2030 is zero waste."
+      ] },
+      "target": { "lang": "de", "sentences": [
+        "Im Jahr 2019 startete die Stadt ein neues Recyclingprogramm.",
+        "Bis 2021 hatten sich über 30000 Haushalte angeschlossen.",
+        "Die Stadt sammelt jedes Jahr 5200 Tonnen Papier.",
+        "Die Glascontainer werden alle 14 Tage geleert.",
+        "Die Bewohner erhalten monatlich 10 Euro zurück.",
+        "Im Jahr 2023 gewann das Programm einen nationalen Preis.",
+        "Mehr als 40 Städte haben das Modell kopiert.",
+        "Das Budget für 2024 beträgt 1,2 Millionen Euro.",
+        "Die Behörden erwarten im nächsten Jahr 5000 neue Teilnehmer.",
+        "Das Ziel für 2030 ist null Abfall."
+      ] },
+      "gold": [[["0"],["0"]], [["1"],["1"]], [["2"],["2"]], [["3"],["3"]], [["4"],["4"]], [["5"],["5"]], [["6"],["6"]], [["7"],["7"]], [["8"],["8"]], [["9"],["9"]]]
+    },
+    {
+      "id": "zh-ja-kanji",
+      "note": "中↔日 1-1，启用共享汉字词汇相似度通道",
+      "source": { "lang": "zh-CN", "sentences": [
+        "中国茶文化历史悠久，种类繁多。",
+        "绿茶是中国产量最大的一类茶。",
+        "龙井茶产于杭州西湖附近。",
+        "传说乾隆皇帝非常喜欢龙井。",
+        "最好的龙井采摘于清明之前。",
+        "明前茶的味道格外鲜嫩。",
+        "泡茶的水温非常有讲究。",
+        "绿茶一般用八十度左右的水冲泡。",
+        "太烫的水会破坏茶叶的营养。",
+        "茶具的选择同样重要。",
+        "玻璃杯最适合观赏茶叶的形态。",
+        "一杯清茶，一份宁静。"
+      ] },
+      "target": { "lang": "ja", "sentences": [
+        "中国の茶文化は長い歴史を持ち、種類も豊富です。",
+        "緑茶は中国で生産量が最も多いお茶です。",
+        "龍井茶は杭州の西湖の近くで生産されます。",
+        "乾隆帝が龍井をとても気に入っていたという伝説があります。",
+        "最高の龍井は清明の前に摘み取られます。",
+        "明前茶の味はとてもみずみずしいです。",
+        "お茶を淹れる水温はとても重要です。",
+        "緑茶は普通八十度ぐらいのお湯で淹れます。",
+        "熱すぎるお湯は茶葉の栄養を壊します。",
+        "茶器の選択も同じように大切です。",
+        "ガラスのカップは茶葉の姿を観賞するのに最適です。",
+        "一杯のお茶と、そこにある静けさ。"
+      ] },
+      "gold": [[["0"],["0"]], [["1"],["1"]], [["2"],["2"]], [["3"],["3"]], [["4"],["4"]], [["5"],["5"]], [["6"],["6"]], [["7"],["7"]], [["8"],["8"]], [["9"],["9"]], [["10"],["10"]], [["11"],["11"]]]
+    },
+    {
+      "id": "en-es-paragraphs",
+      "note": "三段各四句，段落数一致，触发段落锚定",
+      "source": { "lang": "en", "sentences": [
+        "Remote work changed the way companies operate.",
+        "Since the pandemic, millions of employees work from home.",
+        "Video meetings replaced many business trips.",
+        "Office buildings in city centers became quieter.",
+        "Companies redesigned their hiring processes.",
+        "They started to recruit talent from all over the world.",
+        "Location is no longer a barrier for most positions.",
+        "Salaries began to reflect skills rather than geography.",
+        "However, remote work also created new problems.",
+        "Many employees feel isolated and less connected.",
+        "The boundary between work and life became blurry.",
+        "Finding a healthy balance is the new challenge."
+      ] },
+      "target": { "lang": "es", "sentences": [
+        "El trabajo remoto cambió la forma en que operan las empresas.",
+        "Desde la pandemia, millones de empleados trabajan desde casa.",
+        "Las videollamadas reemplazaron muchos viajes de negocios.",
+        "Los edificios de oficinas en los centros urbanos se volvieron más silenciosos.",
+        "Las empresas rediseñaron sus procesos de contratación.",
+        "Empezaron a reclutar talento de todo el mundo.",
+        "La ubicación ya no es una barrera para la mayoría de los puestos.",
+        "Los salarios empezaron a reflejar habilidades en lugar de geografía.",
+        "Sin embargo, el trabajo remoto también creó nuevos problemas.",
+        "Muchos empleados se sienten aislados y menos conectados.",
+        "El límite entre el trabajo y la vida se volvió difuso.",
+        "Encontrar un equilibrio saludable es el nuevo desafío."
+      ] },
+      "paraGroups": [[0,1,2,3],[4,5,6,7],[8,9,10,11]],
+      "gold": [[["0"],["0"]], [["1"],["1"]], [["2"],["2"]], [["3"],["3"]], [["4"],["4"]], [["5"],["5"]], [["6"],["6"]], [["7"],["7"]], [["8"],["8"]], [["9"],["9"]], [["10"],["10"]], [["11"],["11"]]]
+    }
+  ]
+}

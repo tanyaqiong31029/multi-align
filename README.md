@@ -1,5 +1,7 @@
 # 多语平行语料对齐工作台 MultiAlign
 
+[![CI](https://github.com/tanyaqiong31029/multi-align/actions/workflows/ci.yml/badge.svg)](https://github.com/tanyaqiong31029/multi-align/actions/workflows/ci.yml)
+
 **MultiAlign** — a zero-dependency, fully client-side workbench for building sentence-aligned multilingual parallel corpora (5–10 language versions at once), with Gale-Church automatic alignment, human review, and TMX/Excel export.
 
 一个**纯前端、零依赖、双击即用**的多版本双语/多语句子对齐语料库构建工具。参考 tmxmall 等专业对齐平台的四步式工作流，支持 5–10 个语言版本一次生成句句对齐的多语对照表，并可导出 TMX 等标准格式。
@@ -64,6 +66,19 @@ agent-skill/        AI 开发技能包（见下节）
 node agent-skill/scripts/pipeline_test.js          # 默认测试仓库自身
 node agent-skill/scripts/pipeline_test.js <目录>    # 测试其他副本
 ```
+
+## 质量保障
+
+每次推送都会在 GitHub Actions 上自动执行两层检查：
+
+1. **回归测试**：26+ 项断言，覆盖多语分句（缩写/小数/引号）、对齐珠型、翻译单元合并、导出器 ZIP/XML 完整性与 openpyxl 打开校验、DOCX 导入与 GBK 编码识别；
+2. **金标准对齐基准**：6 个多语用例（中英 / 中日 / 英法 / 英德 / 英西）覆盖 1-1 / 1-2 / 2-1 句对变换、段落锚定与数字锚点，当前**宏平均 F1 = 100%**，CI 在 F1 < 97% 时拒绝合并。
+
+```bash
+node benchmark/run_benchmark.js --verbose   # 本地复跑基准，查看逐珠差异
+```
+
+能力边界（诚实声明）：孤立的句中漏译/增译（1-0/0-1）检测是长度统计模型的原理性局限，详见 [benchmark/README.md](benchmark/README.md) 路线图。
 
 ## 开发与本地预览
 

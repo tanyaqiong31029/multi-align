@@ -11,10 +11,15 @@ const { execFileSync } = require('child_process');
 
 const TOOL_DIR = path.resolve(process.argv[2] || path.join(__dirname, '..', '..'));
 const JS = f => path.join(TOOL_DIR, 'js', f);
-let passed = 0, failed = 0;
+let passed = 0, failed = 0, skipped = 0;
 function ok(cond, name) {
   if (cond) { passed++; console.log('  ✓ ' + name); }
   else { failed++; console.error('  ✗ ' + name); }
+}
+function skip(name) { skipped++; console.log('  - 跳过 ' + name + '（环境缺少依赖）'); }
+function pythonHas(mod) {
+  try { execFileSync('python3', ['-c', 'import ' + mod], { stdio: 'pipe' }); return true; }
+  catch (e) { return false; }
 }
 
 global.window = global;
@@ -84,10 +89,12 @@ print('ZIP/XML OK', len(sys.argv)-1, 'files')`;
     execFileSync('python3', ['-c', py, tmpX, tmpZip], { stdio: 'pipe' });
     ok(true, 'XLSX 与两两 TMX ZIP：CRC 与全部 XML 部件校验通过');
   } catch (e) { ok(false, 'ZIP/XML 校验失败: ' + e.message); }
-  try {
-    execFileSync('python3', ['-c', 'import openpyxl,sys; wb=openpyxl.load_workbook(sys.argv[1]); ws=wb.active; assert ws.max_row==15 and ws.max_column==8, (ws.max_row,ws.max_column)', tmpX], { stdio: 'pipe' });
-    ok(true, 'openpyxl 可打开（15 行 8 列）');
-  } catch (e) { ok(false, 'openpyxl 校验失败（可能未安装，可忽略）'); }
+  if (pythonHas('openpyxl')) {
+    try {
+      execFileSync('python3', ['-c', 'import openpyxl,sys; wb=openpyxl.load_workbook(sys.argv[1]); ws=wb.active; assert ws.max_row==15 and ws.max_column==8, (ws.max_row,ws.max_column)', tmpX], { stdio: 'pipe' });
+      ok(true, 'openpyxl 可打开（15 行 8 列）');
+    } catch (e) { ok(false, 'openpyxl 校验失败: ' + e.message.split('\n')[0]); }
+  } else skip('openpyxl 打开校验');
   const csv = Exp.buildDelimited(versions, rows, { sep: ',', includeConf: true });
   ok(csv.split('\r\n').length === 15, `CSV 15 行 → 实际 ${csv.split('\r\n').length}`);
   ok(csv.includes('"'), 'CSV 含引号转义字段（含逗号的句子被引号包裹）');
@@ -95,16 +102,18 @@ print('ZIP/XML OK', len(sys.argv)-1, 'files')`;
 
   console.log('== 5. DOCX 导入 ==');
   const docxTmp = path.join(require('os').tmpdir(), 'ma_test.docx');
-  try {
-    execFileSync('python3', ['-c', `from docx import Document
+  if (pythonHas('docx')) {
+    try {
+      execFileSync('python3', ['-c', `from docx import Document
 d=Document(); d.add_paragraph('这是第一段第一句。这是第一段第二句。'); d.add_paragraph('This is paragraph two. It has two sentences!'); d.save('${docxTmp.replace(/'/g, "\\'")}'); print('ok')`], { stdio: 'pipe' });
-    const buf = fs.readFileSync(docxTmp);
-    const text = await PA.Import.readDocxText(new File([buf], 't.docx'));
-    ok(text.split('\n\n').length === 2 && text.includes('这是第一段第一句'), 'DOCX 两段提取（空行分隔）');
-  } catch (e) { ok(false, 'DOCX 测试失败（python-docx 可能未安装）: ' + e.message.split('\n')[0]); }
+      const buf = fs.readFileSync(docxTmp);
+      const text = await PA.Import.readDocxText(new File([buf], 't.docx'));
+      ok(text.split('\n\n').length === 2 && text.includes('这是第一段第一句'), 'DOCX 两段提取（空行分隔）');
+    } catch (e) { ok(false, 'DOCX 测试失败: ' + e.message.split('\n')[0]); }
+  } else skip('DOCX 两段提取（需 python-docx）');
   const gbk = Buffer.from([0xd6, 0xd0, 0xce, 0xc4]);
   ok(PA.Import.decodeText(gbk.buffer.slice(gbk.byteOffset, gbk.byteOffset + gbk.byteLength)) === '中文', 'GBK 编码识别');
 
-  console.log(`\n结果：${passed} 通过 / ${failed} 失败`);
+  console.log(`\n结果：${passed} 通过 / ${failed} 失败` + (skipped ? ` / ${skipped} 跳过` : ''));
   process.exit(failed ? 1 : 0);
 })();

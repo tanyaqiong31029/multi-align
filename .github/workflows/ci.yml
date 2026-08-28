@@ -1,0 +1,25 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: 安装 Python 校验依赖（XLSX/DOCX 断言用）
+        run: python3 -m pip install --quiet openpyxl python-docx
+
+      - name: 回归测试（分句/对齐/合并/导出/导入，26+ 项断言）
+        run: node agent-skill/scripts/pipeline_test.js
+
+      - name: 金标准对齐基准（宏平均 F1 ≥ 97%）
+        run: node benchmark/run_benchmark.js --min-f1 0.97

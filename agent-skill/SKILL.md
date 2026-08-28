@@ -13,16 +13,16 @@ description: 多语平行语料对齐工具（MultiAlign）的构建、测试、
 
 若路径不存在或用户指向别处，先确认目标目录里有 `index.html` 且其脚本使用 `window.PA` 命名空间；都没有则按 references/architecture.md 从零重建。
 
-## 立即执行：回归测试
+## 立即执行：回归测试与基准
 
-动手改代码**之前和之后**都先跑无头回归（不需要浏览器，约 1 秒）：
+动手改代码**之前和之后**都先跑无头检查（不需要浏览器，约 2 秒）：
 
 ```bash
-node agent-skill/scripts/pipeline_test.js <工具目录>
-# 省略参数时默认测试本仓库根目录
+node agent-skill/scripts/pipeline_test.js          # 回归：分句/对齐/合并/导出/导入 26+ 项断言
+node benchmark/run_benchmark.js --min-f1 0.97      # 金标准基准：6 用例宏平均 F1 ≥ 97%（CI 同款）
 ```
 
-全绿（分句 17 项断言、6 版本对齐 14 TU、导出器 ZIP/XML 校验）才继续。测试失败的排查顺序见下文"已知陷阱"。
+两者全绿才继续。回归失败的排查顺序见下文"已知陷阱"；基准掉点先跑 `--verbose` 看逐珠差异（改 aligner 代价函数/罚分表时尤其要逐用例核对），能力边界与路线图见 `benchmark/README.md`。
 
 ## 架构速览
 
