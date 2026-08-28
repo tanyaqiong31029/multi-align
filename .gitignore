@@ -1,0 +1,16 @@
+# macOS
+.DS_Store
+._*
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# 编辑器
+.vscode/
+.idea/
+*.swp
+
+# 本地测试辅助
+_demo*.html
+*.log

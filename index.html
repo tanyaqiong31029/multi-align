@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>多语平行语料对齐工作台 · MultiAlign</title>
+<meta name="description" content="支持 5–10 个版本的多语平行语料自动句对齐工具：自动分句、Gale-Church 智能对齐、人工审校、导出 TMX / Excel / CSV，全程本地处理。">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232563eb'/%3E%3Cpath d='M4 11h18l-4-4h3l6 5-6 5h-3l4-4H4v-2zm24 10H10l4 4h-3l-6-5 6-5h3l-4 4h18v2z' fill='white'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ================= 顶部导航 ================= -->
+<header class="topnav">
+  <div class="topnav-inner">
+    <div class="brand" id="brandBtn" title="返回首页">
+      <span class="brand-logo">
+        <svg viewBox="0 0 32 32" fill="none"><path d="M4 11h18l-4-4h3l6 5-6 5h-3l4-4H4v-2zm24 10H10l4 4h-3l-6-5 6-5h3l-4 4h18v2z" fill="white"/></svg>
+      </span>
+      多语对齐工作台<small>MultiAlign</small>
+    </div>
+    <nav class="nav-links">
+      <a class="nav-link nav-on" data-view="home">首页</a>
+      <a class="nav-link" data-view="work">对齐工作台</a>
+      <a class="nav-link" data-view="docs">使用指南</a>
+      <a class="nav-link" data-view="about">关于</a>
+    </nav>
+    <span class="nav-ver">v1.0 · 本地运行</span>
+  </div>
+</header>
+
+<main>
+<!-- ================= 首页 ================= -->
+<section class="view view-on" id="view-home">
+  <div class="hero">
+    <div class="container">
+      <h1>多语平行语料<em>句句对齐</em></h1>
+      <p class="sub">参考专业对齐平台流程打造：自动分句 → 智能对齐 → 人工审校 → 导出语料库。
+        支持 5–10 个版本的多语对齐，一次生成全部语言对照表。</p>
+      <div class="hero-tags">
+        <span class="hero-tag">🌍 中 / 英 / 日 / 韩 / 法 / 德 / 西 / 俄 / 阿 / 泰 / 越 …</span>
+        <span class="hero-tag">🧩 自动 1-1 / 1-2 / 2-1 句对齐</span>
+        <span class="hero-tag">🔒 数据不出浏览器</span>
+      </div>
+      <div class="hero-cta">
+        <button class="btn btn-primary btn-lg" data-goto="work">开始构建语料库 →</button>
+        <button class="btn btn-lg" data-goto="docs">使用指南</button>
+      </div>
+      <div class="hero-stats">
+        <div class="hstat"><b>5–10</b><span>同时支持的版本数</span></div>
+        <div class="hstat"><b>20+</b><span>预设语言档案</span></div>
+        <div class="hstat"><b>7 种</b><span>导出格式（TMX 等）</span></div>
+        <div class="hstat"><b>0</b><span>数据上传，全程本地</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="section">
+      <h2 class="section-title">四步构建平行语料库</h2>
+      <p class="section-sub">与 tmxmall 等专业对齐平台一致的工作流</p>
+      <div class="home-steps">
+        <div class="home-step"><div class="num">1</div><h3>导入文本</h3><p>为每个版本粘贴文本或导入 txt / docx 文件，指定语言并选择基准语。</p></div>
+        <div class="home-step"><div class="num">2</div><h3>自动对齐</h3><p>基于 Gale-Church 统计算法，结合数字锚点与词汇相似度，自动句句对齐。</p></div>
+        <div class="home-step"><div class="num">3</div><h3>人工审校</h3><p>表格化审校界面：合并、拆分、移动、锁定，支持搜索替换与撤销重做。</p></div>
+        <div class="home-step"><div class="num">4</div><h3>导出语料</h3><p>一键导出多语言 TMX、两两双语 TMX、Excel、CSV 等格式。</p></div>
+      </div>
+    </div>
+
+    <div class="section" style="padding-top:0">
+      <h2 class="section-title">核心特性</h2>
+      <p class="section-sub">为多版本对照语料设计，不止双语</p>
+      <div class="feat-grid">
+        <div class="feat-card"><div class="feat-ico">📚</div><h3>多版本对齐（5–10 种）</h3><p>以基准语为枢纽，各版本独立对齐后自动合并为一张多语对照表，同一翻译单元内多句自动拼接。</p></div>
+        <div class="feat-card"><div class="feat-ico">📏</div><h3>智能对齐算法</h3><p>Gale-Church 长度统计模型 + 跨语种长度加权（汉字≈2.3 个西文字符）+ 数字锚点 + 同文种词汇相似度。</p></div>
+        <div class="feat-card"><div class="feat-ico">✂️</div><h3>多语自动分句</h3><p>中文、日文、韩文、西文各自的分句规则；识别缩写（e.g. / Mr. / 图.）、小数与引号，避免错切。</p></div>
+        <div class="feat-card"><div class="feat-ico">🧹</div><h3>精细审校工具</h3><p>行合并 / 拆分 / 增删 / 移动，单元格级合并与拆分，行级锁定，置信度标记，搜索替换，撤销重做。</p></div>
+        <div class="feat-card"><div class="feat-ico">📤</div><h3>丰富导出格式</h3><p>多语言 TMX（TU 内含全部语言变体）、基准语×各语言两两 TMX 打包、XLSX / CSV / TSV / TXT / JSON 工程。</p></div>
+        <div class="feat-card"><div class="feat-ico">🔒</div><h3>隐私与可持续</h3><p>纯前端实现，双击即用；文本不上传任何服务器；工程可保存为 JSON 随时继续，自动保存防丢失。</p></div>
+      </div>
+    </div>
+
+    <div class="section" style="padding-top:0;padding-bottom:64px">
+      <h2 class="section-title">导出格式</h2>
+      <p class="section-sub">兼容主流 CAT 与语料工具</p>
+      <div class="fmt-row">
+        <span class="fmt-pill">TMX 1.4（多语言）</span>
+        <span class="fmt-pill">TMX（两两双语 × N）</span>
+        <span class="fmt-pill">Excel .xlsx</span>
+        <span class="fmt-pill">CSV / TSV</span>
+        <span class="fmt-pill">TXT 平行文本</span>
+        <span class="fmt-pill">JSON 工程文件</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 工作台 ================= -->
+<section class="view" id="view-work">
+  <div class="work-wrap">
+    <div class="banner" id="restoreBanner"></div>
+
+    <ol class="stepper">
+      <li id="step1" class="step-on"><span class="s-num">1</span><span class="s-label">导入文本</span></li>
+      <li id="step2"><span class="s-num">2</span><span class="s-label">自动对齐</span></li>
+      <li id="step3"><span class="s-num">3</span><span class="s-label">审校编辑</span></li>
+      <li id="step4"><span class="s-num">4</span><span class="s-label">导出语料</span></li>
+    </ol>
+
+    <!-- ===== 第 1 步 ===== -->
+    <div class="step-pane pane-on" id="pane1">
+      <div class="pane-head">
+        <h2>第一步 · 导入各版本文本</h2>
+        <p>添加同一文本的 2–10 个语言版本（推荐 5–10 个）。可粘贴文本，或导入 txt / md / docx 文件；选择一个版本作为<strong>基准语</strong>（其他语言均与它对齐）。</p>
+      </div>
+      <div class="pane-toolbar">
+        <button class="btn" id="btnSample">📚 载入多语示例</button>
+        <button class="btn" id="btnOpenProj">📂 打开工程文件</button>
+        <button class="btn btn-danger" id="btnClearProj">🗑 清空工程</button>
+        <input type="file" id="projFileInput" accept=".json" hidden>
+      </div>
+
+      <div class="vgrid" id="vlist"></div>
+      <div style="margin-top:16px">
+        <button class="add-version" id="addVersionBtn">＋ 添加版本</button>
+      </div>
+
+      <div class="step-actions">
+        <span class="step1-hint" id="step1Hint">提示：至少需要 2 个版本的文本（推荐 5–10 个）</span>
+        <button class="btn btn-primary btn-lg" id="toStep2Btn" disabled>下一步：设置对齐参数 →</button>
+      </div>
+    </div>
+
+    <!-- ===== 第 2 步 ===== -->
+    <div class="step-pane" id="pane2">
+      <div class="pane-head">
+        <h2>第二步 · 设置参数并自动对齐</h2>
+        <p>算法将把每个版本与基准语逐一进行句句对齐，再合并为多语对照表。</p>
+      </div>
+
+      <div class="card">
+        <h3>版本概览</h3>
+        <div class="chips" id="step2Chips"></div>
+      </div>
+
+      <div class="card">
+        <h3>对齐参数</h3>
+        <div class="set-grid">
+          <div class="set-item">
+            <label><input type="checkbox" id="setUsePara" checked> 启用段落锚定</label>
+            <div class="set-desc">当各版本<strong>自然段数量一致</strong>时，逐段独立对齐，可显著提高准确率（推荐勾选）。</div>
+          </div>
+          <div class="set-item">
+            <label><input type="checkbox" id="setSplitSemi"> 分号（; / ；）视为句界</label>
+            <div class="set-desc">默认分号不切分句子；法律、新闻类文本可开启。</div>
+          </div>
+          <div class="set-item">
+            <label>数字锚点权重 <input type="range" id="setNumWeight" min="0" max="100" value="60">
+              <span class="slider-val" id="numWeightVal">60</span></label>
+            <div class="set-desc">数字、日期、百分比在译文中通常保持一致，是对齐的强线索（跨语种有效）。</div>
+          </div>
+          <div class="set-item">
+            <label>词汇相似度权重 <input type="range" id="setLexWeight" min="0" max="100" value="40">
+              <span class="slider-val" id="lexWeightVal">40</span></label>
+            <div class="set-desc">仅在兼容文种间生效（如中↔日共享汉字、西文之间共享词汇），跨文种自动禁用。</div>
+          </div>
+          <div class="set-item">
+            <label>长度方差（0 = 自动） <input type="number" id="setVariance" min="0" max="50" step="0.1" value="0"></label>
+            <div class="set-desc">Gale-Church 长度方差：同文种 6.8、跨文种 9.0，一般保持默认即可。</div>
+          </div>
+        </div>
+        <details class="adv">
+          <summary>算法说明 ▾</summary>
+          <p style="color:var(--muted);font-size:12.5px;margin-top:10px">
+            采用 Gale &amp; Church (1993) 长度统计对齐模型：以句长差显著性的负对数概率为代价，
+            动态规划求解最优的 1-1 / 1-2 / 2-1 / 2-2 / 1-0 / 0-1 句对组合；跨文种时按“汉字≈2.3 个西文字符”加权。
+            多版本结果通过并查集（连通分量）合并为翻译单元。
+          </p>
+        </details>
+      </div>
+
+      <div class="card">
+        <h3>运行</h3>
+        <div class="progress-track"><div id="alignProgressBar"></div></div>
+        <div class="log-box" id="alignLog" style="min-height:44px">等待运行……</div>
+        <div id="alignResult"></div>
+      </div>
+
+      <div class="step-actions">
+        <button class="btn" id="backTo1Btn">← 返回修改文本</button>
+        <button class="btn btn-primary btn-lg" id="runAlignBtn">⚙ 开始自动对齐</button>
+      </div>
+    </div>
+
+    <!-- ===== 第 3 步 ===== -->
+    <div class="step-pane" id="pane3">
+      <div class="pane-head">
+        <h2>第三步 · 审校编辑</h2>
+        <p>点击单元格直接修改文字；选中行 / 单元格后使用上方工具栏操作。绿色=高置信、黄色=中、红色=低（建议优先审校）、紫色=已修改。快捷键：Ctrl+Z 撤销 / Ctrl+F 搜索 / Ctrl+S 保存工程。</p>
+      </div>
+
+      <div class="banner" id="dirtyBanner">
+        <span>⚠️ 版本文本在对齐后被修改过，当前结果基于旧文本。</span>
+        <button class="btn btn-sm btn-primary" id="btnRealign2">重新对齐</button>
+      </div>
+
+      <div class="toolbar">
+        <span class="tb-group-label">行操作</span>
+        <button class="btn btn-sm" id="btnMergeRow" title="将选中行与下一行合并为一个翻译单元">⇊ 合并下行</button>
+        <button class="btn btn-sm" id="btnInsertRow" title="在选中行下方插入空行">＋ 插行</button>
+        <button class="btn btn-sm" id="btnDeleteRow" title="删除选中行">🗑 删行</button>
+        <button class="btn btn-sm" id="btnRowUp" title="上移一行">↑</button>
+        <button class="btn btn-sm" id="btnRowDown" title="下移一行">↓</button>
+        <span class="tb-sep"></span>
+        <span class="tb-group-label">单元格</span>
+        <button class="btn btn-sm" id="btnCellMerge" title="将该单元格内容与下一行同列单元格合并">⇊ 合并</button>
+        <button class="btn btn-sm" id="btnCellSplit" title="将该单元格按句子拆分为两行">✂ 拆分</button>
+        <button class="btn btn-sm" id="btnCellClear" title="清空该单元格">✕ 清空</button>
+        <span class="tb-sep"></span>
+        <span class="tb-group-label">锁定</span>
+        <button class="btn btn-sm" id="btnLockRow" title="锁定 / 解锁选中行">🔒 锁定行</button>
+        <button class="btn btn-sm" id="btnLockAll">全部锁定</button>
+        <button class="btn btn-sm" id="btnUnlockAll">全部解锁</button>
+        <span class="tb-sep"></span>
+        <button class="btn btn-sm" id="btnUndo" title="Ctrl+Z">↩ 撤销</button>
+        <button class="btn btn-sm" id="btnRedo" title="Ctrl+Y">↪ 重做</button>
+      </div>
+
+      <div class="editor-bar">
+        <span class="bar-info" id="editorInfo"></span>
+        <span class="bar-right">
+          <select id="filterSel" title="筛选显示的行">
+            <option value="all">显示全部行</option>
+            <option value="unlocked">只看未锁定</option>
+            <option value="modified">只看已修改</option>
+            <option value="low">只看低置信度</option>
+          </select>
+          <button class="btn btn-sm" id="fontMinus" title="缩小字号">A-</button>
+          <button class="btn btn-sm" id="fontPlus" title="放大字号">A+</button>
+          <span class="cols-dd">
+            <button class="btn btn-sm" id="btnCols" title="显示 / 隐藏列">列显示 ▾</button>
+            <div class="cols-panel" id="colsPanel"></div>
+          </span>
+          <button class="btn btn-sm" id="btnSearch" title="Ctrl+F">🔍 搜索替换</button>
+          <button class="btn btn-sm" id="btnStats">📊 统计</button>
+          <button class="btn btn-sm" id="btnSaveProj2" title="Ctrl+S">💾 保存工程</button>
+          <button class="btn btn-sm" id="btnRealign">⚙ 重新对齐</button>
+        </span>
+      </div>
+
+      <div class="editor-wrap" id="editorWrap">
+        <table class="etable">
+          <thead id="eThead"></thead>
+          <tbody id="eTbody"></tbody>
+        </table>
+      </div>
+      <div class="editor-foot" id="rowCount"></div>
+
+      <div class="step-actions">
+        <button class="btn" id="btnBackTo2From3" title="返回对齐参数">← 上一步</button>
+        <button class="btn btn-primary btn-lg" id="toStep4Btn">下一步：导出语料 →</button>
+      </div>
+    </div>
+
+    <!-- ===== 第 4 步 ===== -->
+    <div class="step-pane" id="pane4">
+      <div class="pane-head">
+        <h2>第四步 · 导出语料库</h2>
+        <p>选择导出范围与格式。TMX 可直接导入 Trados / memoQ / OmegaT 等 CAT 工具。</p>
+      </div>
+
+      <div class="card">
+        <h3>导出选项</h3>
+        <div class="export-opts">
+          <label><input type="checkbox" id="expOnlyLocked"> 仅导出已锁定行</label>
+          <label><input type="checkbox" id="expSkipEmpty"> 排除含空单元格的行</label>
+          <label><input type="checkbox" id="expIncludeConf" checked> 包含置信度</label>
+          <label>文件名 <input type="text" id="expBaseName" placeholder="对齐语料库"></label>
+        </div>
+      </div>
+
+      <div class="exp-cards" id="exportCards">
+        <div class="exp-card"><span class="exp-ico">🌐</span><h4>TMX · 多语言版</h4>
+          <p>单个 TMX 文件，每个翻译单元包含全部语言变体（&lt;tu&gt; 内多个 &lt;tuv&gt;）。</p>
+          <button class="btn btn-primary" data-export="tmx">导出 .tmx</button></div>
+        <div class="exp-card"><span class="exp-ico">🔁</span><h4>TMX · 两两双语版</h4>
+          <p>基准语 × 每个其他语言各生成一个双语 TMX，打包为 ZIP，适合传统 CAT 工作流。</p>
+          <button class="btn btn-primary" data-export="tmxzip">导出 .zip</button></div>
+        <div class="exp-card"><span class="exp-ico">📊</span><h4>Excel 工作簿</h4>
+          <p>.xlsx 表格：行号 + 各版本列（+ 置信度），便于团队协作与二次加工。</p>
+          <button class="btn btn-primary" data-export="xlsx">导出 .xlsx</button></div>
+        <div class="exp-card"><span class="exp-ico">📄</span><h4>CSV / TSV</h4>
+          <p>带 BOM 的 UTF-8 编码，Excel 直接打开中文不乱码；TSV 适合脚本处理。</p>
+          <div style="display:flex;gap:8px">
+            <button class="btn" data-export="csv">CSV</button>
+            <button class="btn" data-export="tsv">TSV</button>
+          </div></div>
+        <div class="exp-card"><span class="exp-ico">📝</span><h4>TXT 平行文本</h4>
+          <p>每行一个翻译单元，各语言以制表符分隔——机器翻译训练语料常用格式。</p>
+          <button class="btn" data-export="txt">导出 .txt</button></div>
+        <div class="exp-card"><span class="exp-ico">🗂</span><h4>JSON 工程文件</h4>
+          <p>保存完整工程（文本 + 参数 + 审校结果），可随时在本工具中打开继续。</p>
+          <button class="btn" data-export="json">导出 .json</button></div>
+      </div>
+
+      <div id="exportPreview"></div>
+
+      <div class="step-actions">
+        <button class="btn" id="backTo3Btn">← 返回审校</button>
+        <button class="btn btn-primary btn-lg" data-goto="home">✔ 完成</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 使用指南 ================= -->
+<section class="view" id="view-docs">
+  <div class="container-narrow doc-body" style="padding:40px 24px 70px">
+    <h2>使用指南</h2>
+    <p>本工具在浏览器中完成全部计算，<strong>文本不会上传到任何服务器</strong>。建议使用 Chrome / Edge / Safari 16.4+ 等现代浏览器。</p>
+
+    <h2>一、准备文本</h2>
+    <ul>
+      <li>准备同一文本的多个语言版本（2–10 个）。译本的章节、段落结构应与原文基本一致。</li>
+      <li>可接受的输入：直接粘贴文本；<code>.txt</code> / <code>.md</code> 文件（自动识别 UTF-8 / GBK / Big5 编码）；<code>.docx</code> 文件（自动提取正文，保留段落）。</li>
+      <li><strong>段落格式建议</strong>：各版本用空行分隔自然段。若各版本段落数一致，工具会自动启用“段落锚定”，逐段对齐，准确率最高。</li>
+      <li>“一句一行”的文本也可以直接使用——此时每行即一个句子。</li>
+    </ul>
+
+    <h2>二、选择基准语</h2>
+    <p>基准语（pivot）是所有其他版本的对齐参照，通常是<strong>原文</strong>。例如：中文原文 + 英、日、法、德、西 5 个译本，则以中文为基准语，5 个译本分别与中文对齐后合并成 6 列对照表。</p>
+
+    <h2>三、理解对齐结果</h2>
+    <ul>
+      <li>每一行是一个<strong>翻译单元（TU）</strong>，各列为对应语言的句子。</li>
+      <li>某版本一句对基准语两句时，两句会自动拼接放入同一单元格（1-2 对齐）。</li>
+      <li>置信度标记：🟢 高（典型 1-1 对齐）、🟡 中（含 1-2 / 2-1 合并）、🔴 低（未匹配或跨句合并）、🟣 紫（人工修改过）。建议优先审校红色行。</li>
+      <li>单元格为空表示该语言在此处没有对应内容（漏译或原文独有）。</li>
+    </ul>
+
+    <h2>四、审校操作</h2>
+    <ul>
+      <li><strong>编辑文字</strong>：单击单元格直接输入；Tab 跳到下一格，Enter 换行。</li>
+      <li><strong>行操作</strong>：点选行号所在行后，使用工具栏「合并下行 / 插行 / 删行 / 上移下移」。</li>
+      <li><strong>单元格拆分</strong>：选中单元格后点击「✂ 拆分」，按句子切成两行（仅该列，其余列留空，便于补充）。</li>
+      <li><strong>锁定</strong>：确认无误的行请锁定，导出时可只导出已锁定行。</li>
+      <li><strong>搜索替换</strong>：Ctrl+F，可限定某一列，支持全部替换（可撤销）。</li>
+      <li><strong>撤销 / 重做</strong>：Ctrl+Z / Ctrl+Y。</li>
+    </ul>
+
+    <h2>五、导出</h2>
+    <ul>
+      <li><strong>TMX 多语言版</strong>：符合 TMX 1.4 规范，一个 &lt;tu&gt; 内含所有语言的 &lt;tuv&gt;；OmegaT、Trados、memoQ 等均支持。</li>
+      <li><strong>两两 TMX（ZIP）</strong>：基准语 × 每个译本各一个双语 TMX 文件，方便分发给不同语向的团队。</li>
+      <li><strong>Excel / CSV</strong>：行号 + 各版本列；CSV 带 BOM，Excel 打开不乱码。</li>
+      <li><strong>TXT</strong>：制表符分隔的平行文本，可直接用于 MT 训练流水线。</li>
+    </ul>
+
+    <h2>六、常见问题</h2>
+    <h3>对齐错了怎么办？</h3>
+    <p>先用「只看低置信度」筛出可疑行，用合并 / 拆分 / 清空手工修正；长文本建议确保各版本段落数一致以启用段落锚定。</p>
+    <h3>为什么某个版本整列都是空？</h3>
+    <p>通常是该版本与基准语长度比例异常（如误传了别的文档），或句子数差异过大。返回第一步检查文本与语言设置。</p>
+    <h3>支持多少文本量？</h3>
+    <p>常规书籍章节（数千句）可流畅处理；超长文本会自动滑窗分块。建议按章节分批处理。</p>
+    <h3>数据安全吗？</h3>
+    <p>纯前端工具，无任何网络请求（文件图标素材亦为内联 SVG）。工程可通过「保存工程」导出 JSON 备份，浏览器本地另有自动保存。</p>
+
+    <div class="callout">💡 <strong>小技巧</strong>：审校完一批行就锁定一批；导出时勾选「仅导出已锁定行」，可以分批产出高质量语料。</div>
+  </div>
+</section>
+
+<!-- ================= 关于 ================= -->
+<section class="view" id="view-about">
+  <div class="container-narrow doc-body" style="padding:40px 24px 70px">
+    <h2>关于本工具</h2>
+    <p>「多语对齐工作台 MultiAlign」是一个参考 tmxmall 等在线对齐平台交互流程打造的<strong>纯前端多语平行语料构建工具</strong>，面向翻译研究者、本地化团队与 MT 语料工程师。</p>
+    <h3>技术架构</h3>
+    <ul>
+      <li>零依赖原生 HTML / CSS / JavaScript，双击 <code>index.html</code> 即可离线使用。</li>
+      <li>分句引擎：多语规则分句（缩写库、小数与引号处理、CJK 标点规则）。</li>
+      <li>对齐引擎：Gale &amp; Church (1993) 统计句对齐 + 数字锚点 + 兼容文种词汇相似度 + 段落锚定 + 滑窗分块。</li>
+      <li>多版本合并：基准语枢纽对齐 + 并查集连通分量 → 翻译单元。</li>
+      <li>导出器：内置 ZIP 读取（docx 导入）与 ZIP / XLSX 写入（零第三方库）。</li>
+    </ul>
+    <h3>引用</h3>
+    <p>William A. Gale &amp; Kenneth W. Church. 1993. <em>A Program for Aligning Sentences in Bilingual Corpora</em>. Computational Linguistics, 19(1):75–102.</p>
+    <p style="margin-top:24px;color:var(--muted)">版本 v1.0 · 2026</p>
+  </div>
+</section>
+</main>
+
+<footer class="site-footer">
+  <div>多语平行语料对齐工作台 MultiAlign · 纯本地运行，数据不出浏览器</div>
+  <div class="foot-links">
+    <a data-view="home" class="nav-link">首页</a>·<a data-view="docs" class="nav-link">使用指南</a>·<a data-view="about" class="nav-link">关于</a>
+  </div>
+</footer>
+
+<!-- ================= 弹窗 ================= -->
+<div class="modal" id="modalConfirm">
+  <div class="modal-card">
+    <h3 id="confirmTitle">确认</h3>
+    <div class="modal-msg" id="confirmMsg"></div>
+    <div class="modal-btns">
+      <button class="btn" id="confirmCancel">取消</button>
+      <button class="btn btn-primary" id="confirmOk">确定</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="modalSearch">
+  <div class="modal-card">
+    <h3>🔍 搜索替换</h3>
+    <div class="search-row">
+      <input type="text" id="searchTerm" placeholder="查找内容…">
+      <select id="searchScope"></select>
+    </div>
+    <div class="search-row">
+      <input type="text" id="searchReplace" placeholder="替换为…">
+    </div>
+    <div class="search-info" id="searchInfo"></div>
+    <div class="search-btns">
+      <button class="btn btn-sm" id="searchPrev">◀ 上一处</button>
+      <button class="btn btn-sm" id="searchNext">下一处 ▶</button>
+      <button class="btn btn-sm" id="searchReplaceBtn">替换当前</button>
+      <button class="btn btn-sm btn-primary" id="searchReplaceAll">全部替换</button>
+      <button class="btn btn-sm" id="searchClose">关闭</button>
+    </div>
+    <p style="color:var(--muted);font-size:12px;margin-top:12px">搜索期间单元格转为只读（高亮显示）；关闭后恢复编辑。替换操作可通过 Ctrl+Z 撤销。</p>
+  </div>
+</div>
+
+<div class="modal" id="modalStats">
+  <div class="modal-card" style="max-width:640px">
+    <h3>📊 对齐统计</h3>
+    <div id="statsBody"></div>
+    <div class="modal-btns" style="margin-top:16px">
+      <button class="btn" id="btnStatsClose">关闭</button>
+    </div>
+  </div>
+</div>
+
+<div id="toastRoot"></div>
+
+<script src="js/util.js"></script>
+<script src="js/segmenter.js"></script>
+<script src="js/aligner.js"></script>
+<script src="js/merge.js"></script>
+<script src="js/docximport.js"></script>
+<script src="js/exporters.js"></script>
+<script src="js/sample.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
