@@ -30,7 +30,7 @@ fi
 PORT=$(python3 -c 'import socket; s=socket.socket(); s.bind(("127.0.0.1",0)); print(s.getsockname()[1]); s.close()')
 python3 -m http.server "$PORT" --bind 127.0.0.1 > /dev/null 2>&1 &
 SERVER_PID=$!
-trap '{ kill "$SERVER_PID" 2>/dev/null; wait "$SERVER_PID" 2>/dev/null; rm -f _e2e_export.html; }' EXIT
+trap '{ kill "$SERVER_PID" 2>/dev/null || true; wait "$SERVER_PID" 2>/dev/null || true; rm -f _e2e_export.html; }' EXIT
 for i in $(seq 1 20); do curl -s -o /dev/null "http://127.0.0.1:$PORT/index.html" && break; sleep 0.2; done
 
 # 4. 无头执行并抓取 DOM
