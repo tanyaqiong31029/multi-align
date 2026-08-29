@@ -18,7 +18,7 @@ description: 多语平行语料对齐工具（MultiAlign）的构建、测试、
 动手改代码**之前和之后**都先跑无头检查（不需要浏览器，约 2 秒）：
 
 ```bash
-node agent-skill/scripts/pipeline_test.js          # 回归：分句/对齐/合并/导出/导入 26+ 项断言
+node agent-skill/scripts/pipeline_test.js          # 回归：分句/对齐/合并/导出/导入 43 项断言
 node benchmark/run_benchmark.js --min-f1 0.97      # 金标准基准：6 用例宏平均 F1 ≥ 97%（CI 同款）
 ```
 
