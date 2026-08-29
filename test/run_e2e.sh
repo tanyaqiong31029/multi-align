@@ -26,11 +26,11 @@ if [ -z "$CHROME_BIN" ]; then
   else echo "未找到 Chrome（可用 CHROME= 路径 指定）"; exit 1; fi
 fi
 
-# 3. 本地起 HTTP 服务（file:// 下 Chrome 会把错误掩码为 "Script error."）
-PORT=8931
+# 3. 本地起 HTTP 服务（file:// 下 Chrome 会把错误掩码为 "Script error."）；端口动态分配
+PORT=$(python3 -c 'import socket; s=socket.socket(); s.bind(("127.0.0.1",0)); print(s.getsockname()[1]); s.close()')
 python3 -m http.server "$PORT" --bind 127.0.0.1 > /dev/null 2>&1 &
 SERVER_PID=$!
-trap 'kill $SERVER_PID 2>/dev/null' EXIT
+trap '{ kill "$SERVER_PID" 2>/dev/null; wait "$SERVER_PID" 2>/dev/null; rm -f _e2e_export.html; }' EXIT
 for i in $(seq 1 20); do curl -s -o /dev/null "http://127.0.0.1:$PORT/index.html" && break; sleep 0.2; done
 
 # 4. 无头执行并抓取 DOM
@@ -55,5 +55,3 @@ assert r.get('errors') == [], '页面存在未捕获异常: %s' % r.get('errors'
 assert r.get('errToasts', 1) == 0, '出现错误提示 toast'
 print('E2E 通过：TMX / SRT / SRT ZIP 三条导出编排路径全部正常')
 PY
-
-rm -f _e2e_export.html
