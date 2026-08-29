@@ -37,6 +37,12 @@ const jaS = Seg.segmentPlain('これはペンです。そうですね！「行�
 ok(jaS.length === 4, `日文 4 句（「」内句号不切）→ 实际 ${jaS.length}`);
 ok(Seg.segmentPlain('第一段。\n\n第二段开始。', 'zh-CN', {}).length === 2, '空行分段');
 ok(Seg.detectLang('これはペンです。') === 'ja' && Seg.detectLang('Hello world.') === 'en', '语言检测 ja/en');
+const lstZh = Seg.segmentRich('第一章 概述\n1. 引言\n本文研究对齐问题。\n2. 方法\n我们采用统计模型。', 'zh-CN', {}).map(s => s.text);
+ok(lstZh.length === 5 && lstZh[1] === '1. 引言' && lstZh[3] === '2. 方法', '有序列表标号不误切（1. 引言 保持整句）→ 实际 ' + JSON.stringify(lstZh));
+const lstEn = Seg.segmentPlain('He got 3. The game continued.', 'en', {});
+ok(lstEn.length === 2, '句中数字仍切分（He got 3. | The game…）');
+const yrEn = Seg.segmentPlain('It began in 2024. The year was cold.', 'en', {});
+ok(yrEn.length === 2, '年份句界仍切分（in 2024. | The year…）');
 
 console.log('== 2. 六版本对齐 ==');
 const versions = PA.SAMPLE.versions.map(v => ({ id: v.name, name: v.name, lang: v.lang, text: v.text }));

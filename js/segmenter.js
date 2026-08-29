@@ -119,6 +119,9 @@ PA.Seg = (function () {
           if (tok) {
             if (/^(?:[A-Za-z]\.)+[A-Za-z]$/.test(tok) || /^[A-Za-z]$/.test(tok)) boundary = false;
             else if (ABBREV.has(tok.toLowerCase().replace(/\.+$/, ''))) boundary = false;
+            // 行首 1–2 位数字：有序列表标号（"1. 引言" / "12. Conclusion"），不切。
+            // 限行首防误伤句中数字（"He got 3. The game…"），限 2 位防误伤年份（"in 2024. The year…"）。
+            else if (/^\d{1,2}$/.test(tok) && line.slice(0, i).trim() === tok) boundary = false;
           }
         }
         if (boundary && semi) {
