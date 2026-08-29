@@ -22,7 +22,7 @@ node agent-skill/scripts/pipeline_test.js          # 回归：分句/对齐/合�
 node benchmark/run_benchmark.js --min-f1 0.97      # 金标准基准：6 用例宏平均 F1 ≥ 97%（CI 同款）
 ```
 
-两者全绿才继续（回归 36 项断言，含 SRT/VTT 字幕全链路与统计模块默认静默）。回归失败的排查顺序见下文"已知陷阱"；基准掉点先跑 `--verbose` 看逐珠差异（改 aligner 代价函数/罚分表时尤其要逐用例核对），能力边界与路线图见 `benchmark/README.md`。
+再跑导出编排 E2E（无头 Chrome 真实点击 TMX/SRT/SRT ZIP 下载路径）：`bash test/run_e2e.sh`（CI 同款）。三道全绿才继续（回归 40 项断言，含 SRT/VTT 字幕全链路、导出编排层与统计模块默认静默）。回归失败的排查顺序见下文"已知陷阱"；基准掉点先跑 `--verbose` 看逐珠差异（改 aligner 代价函数/罚分表时尤其要逐用例核对），能力边界与路线图见 `benchmark/README.md`。
 
 ## 架构速览
 
@@ -58,7 +58,7 @@ UI 是参考 tmxmall 的四步式流程，工作台视图路由用 hash（`#/hom
 
 **加导出格式**：在 `js/exporters.js` 加 builder（返回 string 或 Blob），在 `js/app.js` `doExport()` 加分支，在 index.html 导出卡片加按钮（`data-export="xxx"`）。ZIP 类产物必须复用 `Exp.makeZip`。
 
-**改 UI**：改 index.html 结构后，核对 app.js `init()` 的 `E('id')` 清单——所有 `el.xxx` 都必须在页面里存在，否则 `bind` 阶段直接抛错、整页瘫痪（无框架无守卫，这是最大的单点故障）。
+**改 UI**：改 index.html 结构后，核对 app.js `init()` 的 `E('id')` 清单——所有 `el.xxx` 都必须在页面里存在，否则 `bind` 阶段直接抛错、整页瘫痪（真实事故见已知陷阱 7；现已有红幅诊断与 E2E 双防线）。
 
 ## 测试方法
 
@@ -84,6 +84,7 @@ sed 's|<script src="js/app.js"></script>|<script src="js/app.js"></script><scrip
 4. **`require` 相对路径**：无头脚本放 /tmp 时 require 必须用绝对路径（CJS 以脚本文件位置解析）。
 5. **`aligner.js` DP 表**：`(n+1)*(m+1)` 超 260 万元素自动切滑窗模式；滑窗的 `bConsumed` 去重逻辑依赖 bead 有序，改对齐类型集合时要重验长文本路径。
 6. **IAB（内置浏览器）截图**可能报 `guest not attached` / `screenshot surface timed out`，标签页也可能变 about:blank——重试前先 `tabs.list()` 重新拿 id；截图验证一律优先无头 Chrome 方案。
+7. **el.xxx 单点故障的真实事故**：`btnSearchRun` 自 v1.0 起缺失于 index.html → `bindSearch()` 在 init 抛错 → 排在其后的 `bindExport`/`bindGlobal` 从未运行（导出按钮/确认框/快捷键全灭），而 DOM 冒烟只验证元素存在、从未点击，长期未被发现。防线：`E()` 缺失 id 页底红幅诊断 + `test/run_e2e.sh` 真实点击导出路径；新增绑定前先确认目标 id 存在。
 
 ## 详细参考
 

@@ -151,6 +151,21 @@ d=Document(); d.add_paragraph('这是第一段第一句。这是第一段第二�
   const backCues = PA.SRT.parse(bilingualSrt);
   ok(backCues.length === 5 && backCues[1].text.includes('Everyone please be on time.') && backCues[1].text.includes('请所有人准时参加。'), '双语 SRT 导出往返解析');
 
+  console.log('== 8. 导出编排层（SRT 路径回归）==');
+  // 回归背景：srtGroups 曾引用 doExport 局部作用域的 versions 导致 ReferenceError，
+  // 且旧测试只测底层导出器、未覆盖编排层。现已改为 exporters 纯函数，可无头直测。
+  ok(typeof Exp.srtGroups === 'function', 'srtGroups 位于导出器层（纯函数 versions 作参）');
+  ok(Exp.srtGroups(versions, rows).length === 0, '无时间轴的 TU 行被过滤（防御未附着即导出）');
+  // 示例为纯文本：给基准语合成时间轴后再附着（与字幕导入后的真实状态一致）
+  segs[versions[0].id].forEach((s, i) => { s.t0 = i * 3000; s.t1 = i * 3000 + 2500; });
+  PA.SRT.attachTiming(tus, versions[0].id, segs[versions[0].id]);
+  const srtRowsAll = Exp.srtGroups(versions, rows);
+  ok(srtRowsAll.length === tus.length && srtRowsAll[0].lines.length === versions.length,
+    '附着时间轴后 ' + tus.length + ' 行全部成组且每行含全部语言');
+  const srtZip = Exp.buildSrtsZip(srtRowsAll, versions, '回归测试');
+  const zipMagic = Buffer.from(await srtZip.slice(0, 2).arrayBuffer()).toString('latin1');
+  ok(zipMagic === 'PK' && srtZip.size > 1000, '字幕 ZIP 完整（PK 魔数 + 体积正常）');
+
   console.log('== 7. 匿名统计模块 ==');
   ok(!!PA.Analytics && typeof PA.Analytics.send === 'function' && PA.Analytics.enabled() === false,
     '默认关闭：ENDPOINT 为空时不发出任何请求');

@@ -63,10 +63,10 @@ agent-skill/        AI 开发技能包（见下节）
 
 仓库附带一份 [ZCode](https://zcode.ai) 技能包 `agent-skill/`：封装了本工具的算法规格、模块约定、已知陷阱与一条**无头回归测试**。把你的 AI 编码助手指向本仓库时，让它先读 `agent-skill/SKILL.md`，即可安全地扩展语言、调参、加导出格式而不破坏现有行为。
 
-运行回归测试（无需浏览器，约 1 秒，26 项断言）：
+运行回归测试（无需浏览器，约 2 秒，40 项断言）：
 
 ```bash
-node agent-skill/scripts/pipeline_test.js          # 默认测试仓库自身（36 项断言）
+node agent-skill/scripts/pipeline_test.js          # 默认测试仓库自身（40 项断言）
 node agent-skill/scripts/pipeline_test.js <目录>    # 测试其他副本
 ```
 
@@ -74,8 +74,9 @@ node agent-skill/scripts/pipeline_test.js <目录>    # 测试其他副本
 
 每次推送都会在 GitHub Actions 上自动执行两层检查：
 
-1. **回归测试**：36 项断言，覆盖多语分句（缩写/小数/引号）、对齐珠型、翻译单元合并、导出器 ZIP/XML 完整性与 openpyxl 打开校验、DOCX 导入、GBK 编码识别、SRT/VTT 字幕全链路与统计模块默认静默；
-2. **金标准对齐基准**：7 个多语用例（中英 / 中日 / 英法 / 英德 / 英西）覆盖 1-1 / 1-2 / 2-1 句对变换、段落锚定、数字锚点与字幕时间轴锚点，当前**宏平均 F1 = 100%**，CI 在 F1 < 97% 时拒绝合并。
+1. **回归测试**：40 项断言，覆盖多语分句（缩写/小数/引号）、对齐珠型、翻译单元合并、导出器 ZIP/XML 完整性与 openpyxl 打开校验、DOCX 导入、GBK 编码识别、SRT/VTT 字幕全链路、导出编排层与统计模块默认静默；
+2. **导出编排 E2E**：无头 Chrome 走完"导入字幕 → 对齐 → 导出"，真实点击 TMX / SRT / SRT ZIP 三条路径并断言下载触发（`bash test/run_e2e.sh`）；
+3. **金标准对齐基准**：7 个多语用例（中英 / 中日 / 英法 / 英德 / 英西）覆盖 1-1 / 1-2 / 2-1 句对变换、段落锚定、数字锚点与字幕时间轴锚点，当前**宏平均 F1 = 100%**，CI 在 F1 < 97% 时拒绝合并。
 
 ```bash
 node benchmark/run_benchmark.js --verbose   # 本地复跑基准，查看逐珠差异

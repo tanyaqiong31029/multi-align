@@ -29,7 +29,12 @@
   };
 
   const el = {};
-  function E(id) { return document.getElementById(id); }
+  const missingEls = [];
+  function E(id) {
+    const node = document.getElementById(id);
+    if (!node) missingEls.push(id);
+    return node;
+  }
   function esc(s) { return U.escapeHtml(s); }
   function byId(id) { return state.versions.find(v => v.id === id) || null; }
   function colColor(vid) {
@@ -120,6 +125,15 @@
     checkAutosave();
     PA.Analytics.init();
     setInterval(autosave, 25000);
+    if (missingEls.length) {
+      const msg = '页面缺少元素: ' + missingEls.join(', ') + '（相关功能未绑定）';
+      console.error('[MultiAlign] ' + msg);
+      const banner = document.createElement('div');
+      banner.style.cssText = 'position:fixed;bottom:0;left:0;right:0;z-index:9999;background:#B42318;color:#fff;' +
+        'padding:10px 18px;font-size:13px;font-family:monospace';
+      banner.textContent = '⚠ ' + msg;
+      document.body.appendChild(banner);
+    }
   }
 
   /* ==================== 视图路由 ==================== */
@@ -1296,14 +1310,6 @@
     el.exportPreview.innerHTML = html;
   }
 
-  /* TU 行 → SRT 字幕组（时间取自基准语，由 attachTiming 附着） */
-  function srtGroups(rows) {
-    return rows.map(r => ({
-      t0: r.tu.t0, t1: r.tu.t1,
-      lines: versions.map(v => (r.tu.cells[v.id] || '').trim())
-    })).filter(g => g.t0 !== undefined && g.t1 !== undefined && g.lines.some(l => l !== ''));
-  }
-
   function doExport(kind) {
     if (!state.tus.length) { toast('暂无对齐结果', 'warn'); return; }
     const rows = exportRows();
@@ -1322,14 +1328,14 @@
         if ((state.segs[state.pivotId] || [{}])[0].t0 === undefined) {
           toast('当前对齐无时间轴：请让基准语使用字幕文件（SRT/VTT）导入', 'warn'); return;
         }
-        const groups = srtGroups(rows);
+        const groups = Exp.srtGroups(versions, rows);
         if (!groups.length) { toast('没有可导出的字幕行', 'warn'); return; }
         U.download(base + '_多语字幕.srt', new Blob([Exp.formatSrtGroups(groups)], { type: 'application/x-subrip;charset=utf-8' }));
       } else if (kind === 'srtzip') {
         if ((state.segs[state.pivotId] || [{}])[0].t0 === undefined) {
           toast('当前对齐无时间轴：请让基准语使用字幕文件（SRT/VTT）导入', 'warn'); return;
         }
-        const groups = srtGroups(rows);
+        const groups = Exp.srtGroups(versions, rows);
         if (!groups.length) { toast('没有可导出的字幕行', 'warn'); return; }
         U.download(base + '_字幕SRT.zip', Exp.buildSrtsZip(groups, versions, base));
       } else if (kind === 'xlsx') {

@@ -232,6 +232,15 @@ PA.Export = (function () {
   }
 
   /* ---------- SRT 字幕 ---------- */
+  /* TU 行 → SRT 字幕组。versions 为当前版本数组（纯函数，不读全局状态）；
+   * 缺时间轴（tu.t0 未被 attachTiming 附着）或整行台词全空的行会被过滤。 */
+  function srtGroups(versions, rows) {
+    return (rows || []).map(r => ({
+      t0: r.tu.t0, t1: r.tu.t1,
+      lines: versions.map(v => (r.tu.cells[v.id] || '').trim())
+    })).filter(g => g.t0 !== undefined && g.t1 !== undefined && g.lines.some(l => l !== ''));
+  }
+
   /* groups: [{t0, t1, lines:[各语言一行]}]（时间取自基准语，由 PA.SRT.attachTiming 附着） */
   function formatSrtGroups(groups) {
     const msToTs = PA.SRT && PA.SRT.msToTs;
@@ -256,6 +265,6 @@ PA.Export = (function () {
 
   return {
     xmlEsc, buildTMX, makeZip, buildXLSX, buildDelimited, buildTXT, buildPairwiseZip,
-    formatSrtGroups, buildSrtsZip
+    srtGroups, formatSrtGroups, buildSrtsZip
   };
 })();

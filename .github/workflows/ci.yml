@@ -18,8 +18,11 @@ jobs:
       - name: 安装 Python 校验依赖（XLSX/DOCX 断言用）
         run: python3 -m pip install --quiet openpyxl python-docx
 
-      - name: 回归测试（分句/对齐/合并/导出/导入/SRT/统计，36 项断言）
+      - name: 回归测试（分句/对齐/合并/导出/导入/SRT/统计，40 项断言）
         run: node agent-skill/scripts/pipeline_test.js
 
       - name: 金标准对齐基准（宏平均 F1 ≥ 97%）
         run: node benchmark/run_benchmark.js --min-f1 0.97
+
+      - name: 导出编排 E2E（真实点击 TMX / SRT / SRT ZIP）
+        run: bash test/run_e2e.sh
