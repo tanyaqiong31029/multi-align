@@ -23,7 +23,7 @@ function pythonHas(mod) {
 }
 
 global.window = global;
-[ 'util.js','segmenter.js','srt.js','aligner.js','merge.js','docximport.js','exporters.js','sample.js' ]
+[ 'util.js','segmenter.js','srt.js','analytics.js','aligner.js','merge.js','docximport.js','exporters.js','sample.js' ]
   .forEach(f => require(JS(f)));
 const U = PA.util, Seg = PA.Seg, Aligner = PA.Aligner, Merge = PA.Merge, Exp = PA.Export;
 
@@ -150,6 +150,13 @@ d=Document(); d.add_paragraph('这是第一段第一句。这是第一段第二�
   const bilingualSrt = Exp.formatSrtGroups(srtTus.map(t => ({ t0: t.t0, t1: t.t1, lines: [t.cells.zh || '', t.cells.en || ''] })));
   const backCues = PA.SRT.parse(bilingualSrt);
   ok(backCues.length === 5 && backCues[1].text.includes('Everyone please be on time.') && backCues[1].text.includes('请所有人准时参加。'), '双语 SRT 导出往返解析');
+
+  console.log('== 7. 匿名统计模块 ==');
+  ok(!!PA.Analytics && typeof PA.Analytics.send === 'function' && PA.Analytics.enabled() === false,
+    '默认关闭：ENDPOINT 为空时不发出任何请求');
+  PA.Analytics.send('align', { versions: 2 });
+  PA.Analytics.send('export', { fmt: 'tmx' });
+  ok(true, 'send() 在未配置端点时静默无异常');
 
   console.log(`\n结果：${passed} 通过 / ${failed} 失败` + (skipped ? ` / ${skipped} 跳过` : ''));
   process.exit(failed ? 1 : 0);

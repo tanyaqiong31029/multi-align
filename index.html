@@ -77,7 +77,7 @@
         <div class="feat-card"><div class="feat-ico">✂️</div><h3>多语自动分句</h3><p>中文、日文、韩文、西文各自的分句规则；识别缩写（e.g. / Mr. / 图.）、小数与引号，避免错切。</p></div>
         <div class="feat-card"><div class="feat-ico">🧹</div><h3>精细审校工具</h3><p>行合并 / 拆分 / 增删 / 移动，单元格级合并与拆分，行级锁定，置信度标记，搜索替换，撤销重做。</p></div>
         <div class="feat-card"><div class="feat-ico">📤</div><h3>丰富导出格式</h3><p>多语言 TMX（TU 内含全部语言变体）、基准语×各语言两两 TMX 打包、XLSX / CSV / TSV / TXT / JSON 工程。</p></div>
-        <div class="feat-card"><div class="feat-ico">🔒</div><h3>隐私与可持续</h3><p>纯前端实现，双击即用；文本不上传任何服务器；工程可保存为 JSON 随时继续，自动保存防丢失。</p></div>
+        <div class="feat-card"><div class="feat-ico">🔒</div><h3>隐私与可持续</h3><p>纯前端实现，双击即用；文本永不上传任何服务器（可选匿名统计仅记事件数、默认关闭）；工程可保存为 JSON 随时继续，自动保存防丢失。</p></div>
       </div>
     </div>
 
@@ -384,7 +384,7 @@
     <h3>支持多少文本量？</h3>
     <p>常规书籍章节（数千句）可流畅处理；超长文本会自动滑窗分块。建议按章节分批处理。</p>
     <h3>数据安全吗？</h3>
-    <p>纯前端工具，无任何网络请求（文件图标素材亦为内联 SVG）。工程可通过「保存工程」导出 JSON 备份，浏览器本地另有自动保存。</p>
+    <p>纯前端工具，<strong>你的文本内容永不上传</strong>。默认状态下页面零网络请求；站点可配置<strong>匿名的聚合使用统计</strong>（仅记录"发生了一次对齐/导出"这类事件计数与随机访客编号，不含任何文本内容，不使用 Cookie），实现代码公开在仓库 <code>analytics/</code> 目录。工程可通过「保存工程」导出 JSON 备份，浏览器本地另有自动保存。</p>
 
     <div class="callout">💡 <strong>小技巧</strong>：审校完一批行就锁定一批；导出时勾选「仅导出已锁定行」，可以分批产出高质量语料。</div>
   </div>
@@ -466,6 +466,7 @@
 <script src="js/util.js"></script>
 <script src="js/segmenter.js"></script>
 <script src="js/srt.js"></script>
+<script src="js/analytics.js"></script>
 <script src="js/aligner.js"></script>
 <script src="js/merge.js"></script>
 <script src="js/docximport.js"></script>

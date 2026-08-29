@@ -118,6 +118,7 @@
     renderVersionCards();
     showView('home');
     checkAutosave();
+    PA.Analytics.init();
     setInterval(autosave, 25000);
   }
 
@@ -395,6 +396,7 @@
     toast('已导入字幕 ' + fname + '：' + cues.length + ' 条台词' + (dur > 0 ? '，约 ' + dur + ' 分钟' : ''), 'ok');
     if (state.tus.length) markDirty();
     if (card) scheduleStats(v.id, card, true);
+    PA.Analytics.send('srt_import');
     autosave();
   }
 
@@ -579,6 +581,7 @@
       '<span>总耗时 <b>' + state.alignMeta.time + ' ms</b></span></div>' +
       '<div class="result-tip">建议优先审校“低置信”行（多为 1-2 合并或未匹配句段）。</div></div>';
     toast('对齐完成：' + tus.length + ' 个翻译单元，正在进入审校…', 'ok');
+    PA.Analytics.send('align', { versions: versions.length, srt: (pS[0] || {}).t0 !== undefined ? 1 : 0 });
     setStep(3);
     autosave();
 
@@ -1341,6 +1344,7 @@
         U.download(base + '.json', new Blob([JSON.stringify(projectJSON(), null, 2)], { type: 'application/json;charset=utf-8' }));
       }
       toast('已导出：' + base + '（' + rows.length + ' 行）', 'ok');
+      PA.Analytics.send('export', { fmt: String(kind).slice(0, 12) });
     } catch (err) {
       toast('导出失败：' + (err && err.message || err), 'err');
     }

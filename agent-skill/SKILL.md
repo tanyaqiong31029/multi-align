@@ -22,7 +22,7 @@ node agent-skill/scripts/pipeline_test.js          # 回归：分句/对齐/合�
 node benchmark/run_benchmark.js --min-f1 0.97      # 金标准基准：6 用例宏平均 F1 ≥ 97%（CI 同款）
 ```
 
-两者全绿才继续（回归 34 项断言，含 SRT/VTT 字幕全链路）。回归失败的排查顺序见下文"已知陷阱"；基准掉点先跑 `--verbose` 看逐珠差异（改 aligner 代价函数/罚分表时尤其要逐用例核对），能力边界与路线图见 `benchmark/README.md`。
+两者全绿才继续（回归 36 项断言，含 SRT/VTT 字幕全链路与统计模块默认静默）。回归失败的排查顺序见下文"已知陷阱"；基准掉点先跑 `--verbose` 看逐珠差异（改 aligner 代价函数/罚分表时尤其要逐用例核对），能力边界与路线图见 `benchmark/README.md`。
 
 ## 架构速览
 
@@ -35,6 +35,7 @@ js/aligner.js     Gale-Church 动态规划对齐（1-1/1-2/2-1/2-2/1-0/0-1）+ �
 js/merge.js       基准语枢纽 + 并查集连通分量 → 多语 TU
 js/docximport.js  迷你 ZIP 读取器 + DOCX 正文提取 + TXT 编码识别（UTF-8/GBK/Big5）
 js/srt.js         SRT/VTT 字幕解析、多语 SRT 生成、TU 时间轴附着
+js/analytics.js   匿名统计客户端（ENDPOINT 为空时完全静默；只上报事件计数，永不含文本）
 js/exporters.js   TMX / 两两 TMX ZIP / XLSX（内置 ZIP 写入器）/ CSV / TSV / TXT / SRT 字幕 / JSON
 js/sample.js      内置 6 语示例（自创文本，英文含 1-2 对齐演示）
 js/app.js         UI 状态机：四步流程（导入→对齐→审校→导出）、编辑器、搜索替换、撤销、自动保存

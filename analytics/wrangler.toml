@@ -1,0 +1,8 @@
+name = "multi-align-stats"
+main = "worker.js"
+compatibility_date = "2024-09-01"
+
+# 部署前：先创建 KV 并把返回的 id 填到下面（见 README.md 第 2 步）
+[[kv_namespaces]]
+binding = "STATS"
+id = "REPLACE_WITH_YOUR_KV_NAMESPACE_ID"

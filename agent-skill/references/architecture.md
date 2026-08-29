@@ -2,6 +2,13 @@
 
 供需要深入修改某个模块时查阅。模块加载顺序固定：`util → segmenter → aligner → merge → docximport → exporters → sample → app`（index.html 中的 script 顺序即依赖顺序）。
 
+## analytics/ — 私有使用统计（可选）
+
+- `js/analytics.js`：客户端。`ENDPOINT` 为空 → 整模块静默（不发任何请求）；sendBeacon（text/plain 简单请求，免预检）+ fetch keepalive 兜底；cid = localStorage 随机 UUID；leave 事件在 visibilitychange hidden 时上报停留秒数。事件仅 visit/leave/align/export/srt_import 五类，永不携带文本。
+- `analytics/worker.js`：Cloudflare Worker（ESM）。POST /collect 校验负载（≤600B、t≤16 字符）后写 KV `d:YYYY-MM-DD`（uv 数组上限 3000，异常负载一律 204 静默丢弃）；GET /stats?key=ADMIN_KEY 聚合全部天数返回 JSON（totals + days，含复访率）。ADMIN_KEY 是 wrangler secret，不在代码里。
+- `analytics/dashboard.html`：站长本地仪表盘，输入 Worker 地址 + 密钥（存本机 localStorage），渲染 PV/UV/复访率/事件/语言分布。
+
+## 模块加载顺序固定
 ## 全局约定
 
 - 命名空间：`window.PA`，各模块 `PA.util / PA.Seg / PA.Aligner / PA.Merge / PA.Export`；`docximport` 往 `PA` 上挂 `PA.crc32` 供 exporters 复用；`PA.SAMPLE` 为示例数据。
@@ -48,6 +55,13 @@
 - `unzipEntry(buffer, name)`：手写 ZIP central directory 解析 + `DecompressionStream('deflate-raw')`（STORE/DEFLATE 都支持）。EOCD 从尾部扫 64KB+22。
 - `readDocxText`：正则提取 `<w:p>` 段 → 段内顺序扫 `<w:t>`/`<w:tab>`/`<w:br>` → 段间以 `\n\n` 连接（**空行分隔能触发段落锚定**，故意的）。不使用 DOMParser（Node 测试兼容）。
 - `decodeText`：UTF-8 strict → UTF-16LE BOM → gbk → big5 → shift_jis → euc-kr 逐个尝试。
+
+## srt.js
+
+- `parse(text)`：宽容解析 SRT/VTT（CRLF、`<i>`/`{\an8}` 标签清理、序号行缺失、无小时时间戳、`.`/`,` 毫秒），输出 `[{start,end,text}]`（毫秒，按开始时间排序），cue 内换行合并为空格。
+- `formatGroups(groups)` /（exporters 内）`formatSrtGroups`：`[{t0,t1,lines[]}]` → 标准 SRT 文本。
+- `attachTiming(tus, pivotId, pivotSegs)`：对齐后为 TU 附基准语时间轴。按序消费 cue，**去空白比对**单元格文本与 cue 拼接（兼容 CJK 无连接符/西文空格两种拼接）；不匹配回退 prevEnd+3s 保证时间轴单调。副作用：写 `tu.t0/tu.t1`，SRT 导出依赖它。
+- aligner 时间锚点：beadCost 内两侧句子都有 `t0/t1` 时按合并跨度 IoU 减 `srtWeight·IoU`；**删除珠（ni===i 或 nj===j）不参与**，守卫 `ni>i && nj>j` 必须保留（否则 B[nj-1] 越界崩溃）。
 
 ## exporters.js
 
