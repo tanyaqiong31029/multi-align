@@ -1,0 +1,87 @@
+name: "🐛 Bug 报告"
+description: "报告 MultiAlign 的问题（请勿粘贴任何语料/字幕文本内容）"
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢反馈！⚠️ 提交前请务必对信息脱敏：**不要粘贴任何语料/字幕文本内容**（工具本就不上传文本，Issue 同样不需要）。
+  - type: dropdown
+    id: env-run
+    attributes:
+      label: 运行方式
+      options:
+        - GitHub Pages 在线版
+        - 本地直接打开 index.html
+        - 自部署（静态托管）
+        - 其他
+    validations:
+      required: true
+  - type: input
+    id: env-browser
+    attributes:
+      label: 浏览器与版本
+      placeholder: "如 Chrome 126 / Safari 17.4 / Edge 126"
+    validations:
+      required: true
+  - type: input
+    id: env-os
+    attributes:
+      label: 操作系统
+      placeholder: "如 macOS 15 / Windows 11 / Ubuntu 24.04"
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: 工具版本
+      description: "在线版见导航栏右侧徽标；本地版请填 commit 哈希或下载日期"
+      placeholder: "如 v1.1.0"
+    validations:
+      required: true
+  - type: dropdown
+    id: step
+    attributes:
+      label: 出错环节
+      options:
+        - "第一步 · 导入文本"
+        - "第二步 · 自动对齐"
+        - "第三步 · 审校编辑"
+        - "第四步 · 导出语料"
+        - "字幕（SRT/VTT）"
+        - "统计模块"
+        - 其他
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: 复现步骤
+      description: 从打开页面到出错的最短操作序列（内容可脱敏为「句子A/句子B」）
+      placeholder: |
+        1. 打开在线版，点击「载入多语示例」
+        2. …
+        3. 出现 …
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: 期望行为 vs 实际行为
+      placeholder: "期望：…；实际：…"
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: 控制台日志（已脱敏）
+      description: "F12 → Console 的报错文本或截图。⚠️ 请勿包含任何语料文本内容。"
+  - type: checkboxes
+    id: sanity
+    attributes:
+      label: 提交前确认
+      options:
+        - label: 我已对信息脱敏，未包含语料/字幕文本内容
+          required: true
+        - label: 我已检索现有 Issue，确认没有重复
+          required: true
