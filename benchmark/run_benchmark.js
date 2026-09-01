@@ -49,7 +49,8 @@ function alignOptions(c) {
 }
 
 /* 由标注句序列重建文本（模拟用户输入形态） */
-function buildText(sentences, lang, paraGroups) {
+function buildText(sentences, lang, paraGroups, linesMode) {
+  if (linesMode) return sentences.join('\n'); // 每句一行：标题/有序列表的真实粘贴形态
   const sep = Seg.isCJKText(sentences.join('')) ? '' : ' ';
   if (!paraGroups) return sentences.join(sep);
   return paraGroups.map(idx => idx.map(i => sentences[i]).join(sep)).join('\n\n');
@@ -69,8 +70,8 @@ for (const c of gold.cases) {
     segS = c.source.sentences.map((t, i) => ({ text: t, para: 0, t0: c.source.timing[i][0], t1: c.source.timing[i][1] }));
     segT = c.target.sentences.map((t, i) => ({ text: t, para: 0, t0: c.target.timing[i][0], t1: c.target.timing[i][1] }));
   } else {
-    const textS = buildText(c.source.sentences, c.source.lang, c.paraGroups);
-    const textT = buildText(c.target.sentences, c.target.lang, c.paraGroups);
+    const textS = buildText(c.source.sentences, c.source.lang, c.paraGroups, c.lines);
+    const textT = buildText(c.target.sentences, c.target.lang, c.paraGroups, c.lines);
     segS = Seg.segmentRich(textS, c.source.lang, { usePara: true });
     segT = Seg.segmentRich(textT, c.target.lang, { usePara: true });
   }
@@ -110,13 +111,19 @@ for (const c of gold.cases) {
   });
   if (missed.length) r.missed = missed;
   if (spurious.length) r.spurious = spurious;
+  // xfail：已知局限用例。当前做不到（F1<1）= 符合预期；意外通过 = XPASS，提示移除标注
+  if (c.xfail) {
+    r.xfail = true;
+    r.xpass = F1 >= 0.999;
+  } else {
+    sumP += P; sumR += R; nScored++;
+  }
   results.push(r);
-  sumP += P; sumR += R; nScored++;
 }
 
 const overall = nScored ? { precision: sumP / nScored, recall: sumR / nScored, f1: 0 } : null;
 /* 宏平均 F1 以各用例 F1 为主 */
-let sumF1 = 0; for (const r of results) if (r.status === 'ok') sumF1 += r.f1;
+let sumF1 = 0; for (const r of results) if (r.status === 'ok' && !r.xfail) sumF1 += r.f1;
 if (overall) overall.f1 = sumF1 / nScored;
 const segFails = results.filter(r => r.status !== 'ok').length;
 
@@ -126,17 +133,23 @@ if (AS_JSON) {
   console.log(`\n══ MultiAlign 金标准对齐基准（${gold.cases.length} 个用例）══\n`);
   for (const r of results) {
     if (r.status !== 'ok') {
-      console.log(`✗ ${r.id.padEnd(20)} [分句失败] ${r.detail}`);
+      console.log(`✗ ${r.id.padEnd(22)} [分句失败] ${r.detail}`);
+    } else if (r.xfail && !r.xpass) {
+      console.log(`⊘ ${r.id.padEnd(22)} [xfail 预期内] F1=${(r.f1 * 100).toFixed(1)}% — ${r.note || ''}`);
+    } else if (r.xfail && r.xpass) {
+      console.log(`⚡ ${r.id.padEnd(22)} [XPASS！已能解决，请移除 xfail 标注] F1=100.0%`);
     } else {
       const flag = r.f1 >= 0.999 ? '✓' : (r.f1 >= 0.9 ? '~' : '✗');
-      console.log(`${flag} ${r.id.padEnd(20)} P=${(r.precision * 100).toFixed(1)}%  R=${(r.recall * 100).toFixed(1)}%  F1=${(r.f1 * 100).toFixed(1)}%  (${r.correct}/${r.predicted} 预测命中 ${r.gold} 金标)`);
+      console.log(`${flag} ${r.id.padEnd(22)} P=${(r.precision * 100).toFixed(1)}%  R=${(r.recall * 100).toFixed(1)}%  F1=${(r.f1 * 100).toFixed(1)}%  (${r.correct}/${r.predicted} 预测命中 ${r.gold} 金标)`);
       if (VERBOSE) {
         if (r.missed) console.log('    漏检:', r.missed.join('  '));
         if (r.spurious) console.log('    多检:', r.spurious.join('  '));
       }
     }
   }
-  console.log(`\n总体（宏平均）：P=${(overall.precision * 100).toFixed(1)}%  R=${(overall.recall * 100).toFixed(1)}%  F1=${(overall.f1 * 100).toFixed(1)}%  分句失败 ${segFails} 例`);
+  const xfailN = results.filter(r => r.xfail && !r.xpass).length;
+  const xpassN = results.filter(r => r.xpass).length;
+  console.log(`\n总体（宏平均，不含 xfail）：P=${(overall.precision * 100).toFixed(1)}%  R=${(overall.recall * 100).toFixed(1)}%  F1=${(overall.f1 * 100).toFixed(1)}%  |  分句失败 ${segFails} 例  xfail 预期内 ${xfailN} 例` + (xpassN ? `  XPASS ${xpassN} 例 ⚡` : ''));
   if (MIN_F1 !== null) console.log(`阈值：F1 ≥ ${(MIN_F1 * 100).toFixed(1)}% → ${overall.f1 >= MIN_F1 && segFails === 0 ? '通过' : '未通过'}`);
   console.log('');
 }

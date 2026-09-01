@@ -58,7 +58,9 @@ PA.Seg = (function () {
 
   /* ---------- 分句 ---------- */
   const ENDERS = '.。！？‼⁇⁈⁉!?…';
-  const CLOSERS = '」』》〉）】〕”’"\'»)]｝｠';
+  // 上标数字（¹²³⁰⁴-⁹）：学术脚注标记，跟随句末标点归前句，避免破坏 "framework.¹ Later…" 的切分
+  const SUPERSCRIPTS = '\u00b9\u00b2\u00b3\u2070\u2074\u2075\u2076\u2077\u2078\u2079';
+  const CLOSERS = '」』》〉）】〕”’"\'»)]｝｠' + SUPERSCRIPTS;
   const ABBREV = new Set(('mr,mrs,ms,dr,prof,sr,jr,st,mt,no,nos,vs,etc,al,inc,ltd,co,corp,dept,univ,approx,apt,appt,' +
     'est,min,max,fig,figs,eq,eqs,ref,refs,vol,vols,pp,p,ed,eds,cf,ca,cca,sec,secs,hrs,hr,' +
     'jan,feb,mar,apr,jun,jul,aug,sep,sept,oct,nov,dec,mon,tue,wed,thu,fri,sat,sun,' +
