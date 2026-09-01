@@ -2,9 +2,13 @@
 
 [![CI](https://github.com/tanyaqiong31029/multi-align/actions/workflows/ci.yml/badge.svg)](https://github.com/tanyaqiong31029/multi-align/actions/workflows/ci.yml)
 
+[![在线版](https://img.shields.io/badge/在线版-GitHub%20Pages-3C5488)](https://tanyaqiong31029.github.io/multi-align/)
+
 **MultiAlign** — a zero-dependency, fully client-side workbench for building sentence-aligned multilingual parallel corpora (5–10 language versions at once), with Gale-Church automatic alignment, human review, and TMX/Excel export.
 
 一个**纯前端、零依赖、双击即用**的多版本双语/多语句子对齐语料库构建工具。参考 tmxmall 等专业对齐平台的四步式工作流，支持 5–10 个语言版本一次生成句句对齐的多语对照表，并可导出 TMX 等标准格式。
+
+👉 **在线使用**：https://tanyaqiong31029.github.io/multi-align/ （纯静态页面，语料仅在浏览器本地处理）
 
 | 首页 | 审校编辑器（6 语对照） |
 |---|---|
