@@ -17,3 +17,7 @@ _demo*.html
 
 # 本地营销物料（不入库）
 promo/
+
+# Node 工程化（devDependencies 安装产物，不入库；package-lock.json 需提交）
+node_modules/
+.eslintcache
