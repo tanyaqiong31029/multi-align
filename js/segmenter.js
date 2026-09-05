@@ -81,7 +81,7 @@ PA.Seg = (function () {
       case 'cyrillic': case 'greek':
         return ch.toLowerCase() !== ch && ch.toLowerCase() !== ch.toUpperCase();
       default:
-        return /["“‘(\[«《「『【'«]/.test(ch);
+        return /["“‘([«《「『【'«]/.test(ch);
     }
   }
 

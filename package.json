@@ -1,0 +1,23 @@
+{
+  "name": "multi-align",
+  "version": "1.1.0",
+  "private": true,
+  "description": "MultiAlign —— 纯前端零依赖多语平行语料句对齐工作台。本文件仅承载工程化工具链（husky/commitlint/eslint），全部为 devDependencies，不引入任何运行时依赖，不影响『双击 index.html 即用』。",
+  "scripts": {
+    "prepare": "husky",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
+  },
+  "lint-staged": {
+    "**/*.js": "eslint --fix"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.6.0",
+    "@commitlint/config-conventional": "^19.6.0",
+    "@eslint/js": "^9.17.0",
+    "eslint": "^9.17.0",
+    "globals": "^15.14.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.3.0"
+  }
+}

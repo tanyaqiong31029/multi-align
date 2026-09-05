@@ -1,0 +1,21 @@
+# 本地提交安检（由 .husky/pre-commit 统一调度）：
+#   - 文件卫生：行尾空白 / 文件末尾换行 / YAML 语法 / 合并冲突标记 / 私钥
+#   - gitleaks：密钥泄露扫描（与 CI 的 secrets job 双保险）
+# 说明：本项目为纯前端零依赖项目（无 Python 代码），故不引入 ruff；
+#       全量历史扫描由 .github/workflows/ci.yml 的 secrets job 负责。
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+        # Markdown 行尾双空格是刻意的换行语义，不改动
+        exclude: \.md$
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-merge-conflict
+      - id: detect-private-key
+
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.18.4
+    hooks:
+      - id: gitleaks
