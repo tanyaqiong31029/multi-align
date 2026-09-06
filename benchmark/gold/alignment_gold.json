@@ -19498,6 +19498,1023 @@
           ]
         ]
       ]
+    },
+    {
+      "id": "tatoeba-zh-en",
+      "note": "真实公开语料：Tatoeba 社区句对 100 对（经 OPUS 获取，v2026-07-08 快照，轮回分句稳定筛选）。金标=源顺序恒等对齐",
+      "license": "CC-BY 2.0 FR — Tatoeba (https://tatoeba.org)，经 OPUS (opus.nlpl.eu) 获取",
+      "source": {
+        "lang": "zh-CN",
+        "sentences": [
+          "她寫完了一封信。",
+          "看了信之後，她把它撕成碎片。",
+          "她在找工作和读大学之前无法取舍。",
+          "她在睡眠中安详地去世了。",
+          "她每星期去作一次健美操。",
+          "她以轻柔的语调说话。",
+          "她忙著做她的功課。",
+          "她不能写字也不能看书。",
+          "她把随附的支票寄给了我。",
+          "她在那裡留了一會。",
+          "她把她錢包裏僅有的幾枚硬幣都給了那個男孩。",
+          "她原谅了男孩的粗鲁。",
+          "她要男孩們粉刷房子。",
+          "她說再見的時候，臉上掛著笑容，但其實心中是十分難受的。",
+          "她能说一口流利的西班牙语。",
+          "她會唱歌而且舞跳得很美。",
+          "她出去買些食物了。",
+          "她不介意要洗碗。",
+          "她很想要一条新的连衣裙。",
+          "她专注在她的新工作上。",
+          "她為了找新工作而來了東京。",
+          "她有興趣學習新的想法。",
+          "她想要一頂新帽子。",
+          "她很快地瞟了一眼報紙。",
+          "她在樹林裡迷路了。",
+          "她在樹林裏散步。",
+          "她畢業於神戶大學。",
+          "她彎低身子，把錢幣撿了起來。",
+          "她撿起了一塊鵝卵石。",
+          "她是個和藹可親的人。",
+          "她想方设法以一己之力完成了工作。",
+          "她在图书馆读一本书。",
+          "她是个数学天才。",
+          "她正在周游世界。",
+          "她周遊世界各地。",
+          "她最愛的裙子已經不合身了，所以她母親得重新造一件給她。",
+          "她長大後成為了一名獸醫。",
+          "她不論黨派把票投給了西岡先生。",
+          "她應該中午到那裡。",
+          "我觉得她很老实。",
+          "她被安葬在她的家鄉。",
+          "她買了一些布料，打算為自己做一條裙子。",
+          "她提高了她的嗓音。",
+          "她穿了一件蓝色大衣。",
+          "她穿了一条红色的裙子。",
+          "她把她的寶寶抱在懷裡。",
+          "她正在給嬰兒洗澡。",
+          "她幫我清除積雪。",
+          "她上個月在美國。",
+          "她嘗試把老師說的每一句話都記下來。",
+          "她十分尊敬她的老師。",
+          "她非常尊敬她的老师。",
+          "她去车站给她老师送行。",
+          "她從頭到腳都濕透了。",
+          "她的笔迹漂亮极了。",
+          "她生了雙胞胎女兒。",
+          "她把頭從窗戶外縮回來。",
+          "她把窗簾掛在窗戶上。",
+          "她在草地上躺了下來。",
+          "她屏着氣息，躲了在門的後面。",
+          "她为自己的儿子成为医生而自豪。",
+          "她买了一部照相机给她儿子。",
+          "她留了很多钱给她儿子。",
+          "她拍拍她兒子的肩膀。",
+          "她把她兒子忘在車裡。",
+          "她跑得很快是为了赶上其他成员。",
+          "她不關心別人；也就是說，她很自私。",
+          "她在學校參加了很多活動。",
+          "她的体重减轻了。",
+          "她是在为其担心她会发胖的饮食。",
+          "她延長停留五天。",
+          "她多停留了五天。",
+          "她不在廚房裏，也不在客廳裏。",
+          "她有一雙藍色的大眼睛。",
+          "她在吃东西比赛里得了一等奖。",
+          "她对谁都很和蔼可亲。",
+          "她对大家都很亲切。",
+          "她和男人一起工作。",
+          "她听到那个消息后惊呆了。",
+          "她最晚9点必须回家。",
+          "她可能迟到，然后我们就要等。",
+          "她现在正在吃午餐。",
+          "她從早上工作到夜晚。",
+          "她正在準備早餐。",
+          "她吃早餐前去了散步。",
+          "她不喜歡住在城市裡。",
+          "她病了很久，现在还很虚弱，无法随意走动。",
+          "她坐在甲板上，长头发随风飞舞。",
+          "她穿了一件宽松的长外套。",
+          "她花了好长时间挑帽子。",
+          "她不习惯长时间驾车。",
+          "她背痛了好多年了。",
+          "她受到了长途旅行吗？",
+          "她写了一本关于鸟类的书。",
+          "她对鸟类和花草很有研究。",
+          "她不会乘飞机因为害怕坠机。",
+          "她在大街上看见我的时候冲我笑了笑。",
+          "她过马路的时候被车撞了。",
+          "她非常想当口译。",
+          "她有咬指甲的习惯。"
+        ]
+      },
+      "target": {
+        "lang": "en",
+        "sentences": [
+          "She finished writing a letter.",
+          "After she had read the letter, she tore it to pieces.",
+          "She can't make up her mind whether to get a job or to go on to college.",
+          "She passed away peacefully in her sleep.",
+          "She goes to aerobics once a week.",
+          "She spoke in soft tones.",
+          "She was busy doing her homework.",
+          "She cannot write or read.",
+          "She sent me the enclosed check.",
+          "She stayed there for a moment.",
+          "She gave the boy what few coins she had in her purse.",
+          "She forgave the boy for his rudeness.",
+          "She had the boys paint the house.",
+          "She said good-bye with a smile, but there was a good deal of bitterness in her heart.",
+          "She can speak Spanish well.",
+          "She can sing and dance beautifully.",
+          "She went out to buy some food.",
+          "She didn't mind doing the dishes.",
+          "She wants a new dress badly.",
+          "She applied her mind to her new job.",
+          "She came to Tokyo with a view to getting a new job.",
+          "She is interested in learning new ideas.",
+          "She wants a new hat.",
+          "She glanced briefly at the newspaper.",
+          "She went astray in the woods.",
+          "She walked in the woods.",
+          "She graduated from Kobe University.",
+          "She bent down and picked up the coin.",
+          "She stooped to pick up a pebble.",
+          "She is good-natured.",
+          "She managed to finish the work on her own.",
+          "She is reading a book in the library.",
+          "She was a genius in mathematics.",
+          "She is traveling around the world.",
+          "She traveled all over the world.",
+          "She's grown out of her favorite dress, so her mother will have to make it over for her.",
+          "She grew up to be a veterinarian.",
+          "She voted for Mr Nishioka irrespective of party lines.",
+          "She should be there at noon.",
+          "I think that she's honest.",
+          "She was buried in her hometown.",
+          "She has bought some cloth; she is going to make herself a dress.",
+          "She raised her voice.",
+          "She was wearing a blue coat.",
+          "She wore a red dress.",
+          "She folded her baby in her arms.",
+          "She is giving the baby a bath.",
+          "She helped me to clear snow away.",
+          "She was in America last month.",
+          "She tried to take down every word the teacher said.",
+          "She has great respect for her teacher.",
+          "She has great respect for her teacher.",
+          "She went to the station to see her teacher off.",
+          "She was soaked from head to foot.",
+          "She writes an excellent hand.",
+          "She gave birth to twin girls.",
+          "She withdrew her head from a window.",
+          "She hung a curtain over the window.",
+          "She laid herself on the grass.",
+          "She hid behind the door and held her breath.",
+          "She is proud that her son has become a doctor.",
+          "She bought her son a camera.",
+          "She left her son a lot of money.",
+          "She patted her son on the shoulder.",
+          "She left her son alone in the car.",
+          "She ran very fast to catch up with the other members.",
+          "She doesn't pay attention to others; in other words, she is selfish.",
+          "She participates in many school activities.",
+          "She has lost weight.",
+          "She is on a diet for fear that she will put on weight.",
+          "She extended her stay by five days.",
+          "She extended her stay by five days.",
+          "She is neither in the kitchen nor in the living room.",
+          "She has large blue eyes.",
+          "She got first prize in the eating contest.",
+          "She is gracious to everyone.",
+          "She was all kindness to everybody.",
+          "She worked side by side with men.",
+          "She was amazed to hear the news.",
+          "She must come home by 9 at latest.",
+          "She may be late, in which case we will wait.",
+          "She is having lunch now.",
+          "She worked from morning till night.",
+          "She is getting breakfast ready.",
+          "She took a walk before breakfast.",
+          "She didn't like living in the city.",
+          "She has been ill for a long time and she is still too weak to get about.",
+          "She stood on the deck with her long hair waving in the wind.",
+          "She wore a long, loose coat.",
+          "It took her a long time to choose a hat.",
+          "She is not accustomed to driving for a long time.",
+          "She's been having trouble with back pain for years.",
+          "Is she equal to a long journey?",
+          "She wrote a book about the bird.",
+          "She is keen on birds and flowers.",
+          "She won't take an airplane for fear of a crash.",
+          "She smiled at me as she passed me in the street.",
+          "She was hit by a car while she was crossing the street.",
+          "She has a strong wish to work as an interpreter.",
+          "She has a habit of biting her nails."
+        ]
+      },
+      "gold": [
+        [
+          [
+            "0"
+          ],
+          [
+            "0"
+          ]
+        ],
+        [
+          [
+            "1"
+          ],
+          [
+            "1"
+          ]
+        ],
+        [
+          [
+            "2"
+          ],
+          [
+            "2"
+          ]
+        ],
+        [
+          [
+            "3"
+          ],
+          [
+            "3"
+          ]
+        ],
+        [
+          [
+            "4"
+          ],
+          [
+            "4"
+          ]
+        ],
+        [
+          [
+            "5"
+          ],
+          [
+            "5"
+          ]
+        ],
+        [
+          [
+            "6"
+          ],
+          [
+            "6"
+          ]
+        ],
+        [
+          [
+            "7"
+          ],
+          [
+            "7"
+          ]
+        ],
+        [
+          [
+            "8"
+          ],
+          [
+            "8"
+          ]
+        ],
+        [
+          [
+            "9"
+          ],
+          [
+            "9"
+          ]
+        ],
+        [
+          [
+            "10"
+          ],
+          [
+            "10"
+          ]
+        ],
+        [
+          [
+            "11"
+          ],
+          [
+            "11"
+          ]
+        ],
+        [
+          [
+            "12"
+          ],
+          [
+            "12"
+          ]
+        ],
+        [
+          [
+            "13"
+          ],
+          [
+            "13"
+          ]
+        ],
+        [
+          [
+            "14"
+          ],
+          [
+            "14"
+          ]
+        ],
+        [
+          [
+            "15"
+          ],
+          [
+            "15"
+          ]
+        ],
+        [
+          [
+            "16"
+          ],
+          [
+            "16"
+          ]
+        ],
+        [
+          [
+            "17"
+          ],
+          [
+            "17"
+          ]
+        ],
+        [
+          [
+            "18"
+          ],
+          [
+            "18"
+          ]
+        ],
+        [
+          [
+            "19"
+          ],
+          [
+            "19"
+          ]
+        ],
+        [
+          [
+            "20"
+          ],
+          [
+            "20"
+          ]
+        ],
+        [
+          [
+            "21"
+          ],
+          [
+            "21"
+          ]
+        ],
+        [
+          [
+            "22"
+          ],
+          [
+            "22"
+          ]
+        ],
+        [
+          [
+            "23"
+          ],
+          [
+            "23"
+          ]
+        ],
+        [
+          [
+            "24"
+          ],
+          [
+            "24"
+          ]
+        ],
+        [
+          [
+            "25"
+          ],
+          [
+            "25"
+          ]
+        ],
+        [
+          [
+            "26"
+          ],
+          [
+            "26"
+          ]
+        ],
+        [
+          [
+            "27"
+          ],
+          [
+            "27"
+          ]
+        ],
+        [
+          [
+            "28"
+          ],
+          [
+            "28"
+          ]
+        ],
+        [
+          [
+            "29"
+          ],
+          [
+            "29"
+          ]
+        ],
+        [
+          [
+            "30"
+          ],
+          [
+            "30"
+          ]
+        ],
+        [
+          [
+            "31"
+          ],
+          [
+            "31"
+          ]
+        ],
+        [
+          [
+            "32"
+          ],
+          [
+            "32"
+          ]
+        ],
+        [
+          [
+            "33"
+          ],
+          [
+            "33"
+          ]
+        ],
+        [
+          [
+            "34"
+          ],
+          [
+            "34"
+          ]
+        ],
+        [
+          [
+            "35"
+          ],
+          [
+            "35"
+          ]
+        ],
+        [
+          [
+            "36"
+          ],
+          [
+            "36"
+          ]
+        ],
+        [
+          [
+            "37"
+          ],
+          [
+            "37"
+          ]
+        ],
+        [
+          [
+            "38"
+          ],
+          [
+            "38"
+          ]
+        ],
+        [
+          [
+            "39"
+          ],
+          [
+            "39"
+          ]
+        ],
+        [
+          [
+            "40"
+          ],
+          [
+            "40"
+          ]
+        ],
+        [
+          [
+            "41"
+          ],
+          [
+            "41"
+          ]
+        ],
+        [
+          [
+            "42"
+          ],
+          [
+            "42"
+          ]
+        ],
+        [
+          [
+            "43"
+          ],
+          [
+            "43"
+          ]
+        ],
+        [
+          [
+            "44"
+          ],
+          [
+            "44"
+          ]
+        ],
+        [
+          [
+            "45"
+          ],
+          [
+            "45"
+          ]
+        ],
+        [
+          [
+            "46"
+          ],
+          [
+            "46"
+          ]
+        ],
+        [
+          [
+            "47"
+          ],
+          [
+            "47"
+          ]
+        ],
+        [
+          [
+            "48"
+          ],
+          [
+            "48"
+          ]
+        ],
+        [
+          [
+            "49"
+          ],
+          [
+            "49"
+          ]
+        ],
+        [
+          [
+            "50"
+          ],
+          [
+            "50"
+          ]
+        ],
+        [
+          [
+            "51"
+          ],
+          [
+            "51"
+          ]
+        ],
+        [
+          [
+            "52"
+          ],
+          [
+            "52"
+          ]
+        ],
+        [
+          [
+            "53"
+          ],
+          [
+            "53"
+          ]
+        ],
+        [
+          [
+            "54"
+          ],
+          [
+            "54"
+          ]
+        ],
+        [
+          [
+            "55"
+          ],
+          [
+            "55"
+          ]
+        ],
+        [
+          [
+            "56"
+          ],
+          [
+            "56"
+          ]
+        ],
+        [
+          [
+            "57"
+          ],
+          [
+            "57"
+          ]
+        ],
+        [
+          [
+            "58"
+          ],
+          [
+            "58"
+          ]
+        ],
+        [
+          [
+            "59"
+          ],
+          [
+            "59"
+          ]
+        ],
+        [
+          [
+            "60"
+          ],
+          [
+            "60"
+          ]
+        ],
+        [
+          [
+            "61"
+          ],
+          [
+            "61"
+          ]
+        ],
+        [
+          [
+            "62"
+          ],
+          [
+            "62"
+          ]
+        ],
+        [
+          [
+            "63"
+          ],
+          [
+            "63"
+          ]
+        ],
+        [
+          [
+            "64"
+          ],
+          [
+            "64"
+          ]
+        ],
+        [
+          [
+            "65"
+          ],
+          [
+            "65"
+          ]
+        ],
+        [
+          [
+            "66"
+          ],
+          [
+            "66"
+          ]
+        ],
+        [
+          [
+            "67"
+          ],
+          [
+            "67"
+          ]
+        ],
+        [
+          [
+            "68"
+          ],
+          [
+            "68"
+          ]
+        ],
+        [
+          [
+            "69"
+          ],
+          [
+            "69"
+          ]
+        ],
+        [
+          [
+            "70"
+          ],
+          [
+            "70"
+          ]
+        ],
+        [
+          [
+            "71"
+          ],
+          [
+            "71"
+          ]
+        ],
+        [
+          [
+            "72"
+          ],
+          [
+            "72"
+          ]
+        ],
+        [
+          [
+            "73"
+          ],
+          [
+            "73"
+          ]
+        ],
+        [
+          [
+            "74"
+          ],
+          [
+            "74"
+          ]
+        ],
+        [
+          [
+            "75"
+          ],
+          [
+            "75"
+          ]
+        ],
+        [
+          [
+            "76"
+          ],
+          [
+            "76"
+          ]
+        ],
+        [
+          [
+            "77"
+          ],
+          [
+            "77"
+          ]
+        ],
+        [
+          [
+            "78"
+          ],
+          [
+            "78"
+          ]
+        ],
+        [
+          [
+            "79"
+          ],
+          [
+            "79"
+          ]
+        ],
+        [
+          [
+            "80"
+          ],
+          [
+            "80"
+          ]
+        ],
+        [
+          [
+            "81"
+          ],
+          [
+            "81"
+          ]
+        ],
+        [
+          [
+            "82"
+          ],
+          [
+            "82"
+          ]
+        ],
+        [
+          [
+            "83"
+          ],
+          [
+            "83"
+          ]
+        ],
+        [
+          [
+            "84"
+          ],
+          [
+            "84"
+          ]
+        ],
+        [
+          [
+            "85"
+          ],
+          [
+            "85"
+          ]
+        ],
+        [
+          [
+            "86"
+          ],
+          [
+            "86"
+          ]
+        ],
+        [
+          [
+            "87"
+          ],
+          [
+            "87"
+          ]
+        ],
+        [
+          [
+            "88"
+          ],
+          [
+            "88"
+          ]
+        ],
+        [
+          [
+            "89"
+          ],
+          [
+            "89"
+          ]
+        ],
+        [
+          [
+            "90"
+          ],
+          [
+            "90"
+          ]
+        ],
+        [
+          [
+            "91"
+          ],
+          [
+            "91"
+          ]
+        ],
+        [
+          [
+            "92"
+          ],
+          [
+            "92"
+          ]
+        ],
+        [
+          [
+            "93"
+          ],
+          [
+            "93"
+          ]
+        ],
+        [
+          [
+            "94"
+          ],
+          [
+            "94"
+          ]
+        ],
+        [
+          [
+            "95"
+          ],
+          [
+            "95"
+          ]
+        ],
+        [
+          [
+            "96"
+          ],
+          [
+            "96"
+          ]
+        ],
+        [
+          [
+            "97"
+          ],
+          [
+            "97"
+          ]
+        ],
+        [
+          [
+            "98"
+          ],
+          [
+            "98"
+          ]
+        ],
+        [
+          [
+            "99"
+          ],
+          [
+            "99"
+          ]
+        ]
+      ]
     }
   ]
 }
