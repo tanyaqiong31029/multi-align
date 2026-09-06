@@ -480,7 +480,6 @@
   }
 
   function renderStep2() {
-    const pivot = byId(state.pivotId) || state.versions[0];
     el.step2Chips.innerHTML = state.versions.map(v => {
       const g = Seg.langInfo(v.lang);
       const n = (state.segs[v.id] || []).length;
@@ -728,10 +727,10 @@
   }
 
   function confDot(tu) {
-    let cls = 'conf-lo', label = '低';
-    if (tu.modified) { cls = 'conf-mod'; label = '改'; }
-    else if (tu.conf >= 0.9) { cls = 'conf-hi'; label = '高'; }
-    else if (tu.conf >= 0.6) { cls = 'conf-mid'; label = '中'; }
+    let cls = 'conf-lo';
+    if (tu.modified) { cls = 'conf-mod'; }
+    else if (tu.conf >= 0.9) { cls = 'conf-hi'; }
+    else if (tu.conf >= 0.6) { cls = 'conf-mid'; }
     return '<span class="conf-dot ' + cls + '" title="置信度 ' + Math.round((tu.conf || 0) * 100) + '%"></span>';
   }
 

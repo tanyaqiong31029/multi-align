@@ -11,7 +11,7 @@ import globals from "globals";
  *   analytics/           —— Cloudflare Worker（ES 模块）
  *
  * 对老代码的放宽（legacy 噪音，均为 lint 级别、不改业务语义）：
- *   - no-unused-vars 降为 warn 并关闭对 args / catch 参数的检查
+ *   - no-unused-vars 关闭对 args / catch 参数的检查，但未用局部变量仍为 error
  *     （历史代码大量 `catch (e) {}` 与未用的回调参数）
  *   - no-empty 允许空的 catch 块（同上，配合上条）
  *   - js/exporters.js 关闭 no-control-regex（CSV/XLSX 导出时清洗控制字符属刻意行为）
@@ -23,7 +23,7 @@ export default [
   js.configs.recommended,
   {
     rules: {
-      "no-unused-vars": ["warn", { args: "none", caughtErrors: "none" }],
+      "no-unused-vars": ["error", { args: "none", caughtErrors: "none" }],
       "no-empty": ["error", { allowEmptyCatch: true }],
     },
   },
