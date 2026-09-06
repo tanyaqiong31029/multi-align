@@ -4,7 +4,8 @@ import globals from "globals";
 /**
  * ESLint flat config（仅作用于独立 .js 文件；HTML 内联脚本不在覆盖范围）。
  * 目录分派依据各脚本的实际运行环境：
- *   js/、test/           —— 浏览器 <script> 加载的经典脚本（window.PA 命名空间）
+ *   js/、test/           —— 浏览器 <script> 加载的经典脚本（window.PA 命名空间）；
+ *                           例外：test/check_coverage.js 为 Node CJS（覆盖率门槛检查）
  *   benchmark/、agent-skill/scripts/ —— Node CommonJS（现有 CI 直接 node 运行），
  *                           其测试脚手架在 VM 中注入 PA 全局后运行浏览器代码，
  *                           故 PA 同为已知全局
@@ -32,6 +33,13 @@ export default [
     languageOptions: {
       sourceType: "script",
       globals: { ...globals.browser, PA: "readonly" },
+    },
+  },
+  {
+    files: ["test/check_coverage.js"],
+    languageOptions: {
+      sourceType: "commonjs",
+      globals: { ...globals.node },
     },
   },
   {

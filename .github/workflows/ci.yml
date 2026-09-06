@@ -39,6 +39,14 @@ jobs:
       - name: 金标准对齐基准（宏平均 F1 ≥ 97%）
         run: node benchmark/run_benchmark.js --min-f1 0.97
 
+      - name: 覆盖率门槛（核心模块行覆盖）
+        run: |
+          npx --yes c8 --reporter=json-summary \
+            --include "js/aligner.js" --include "js/segmenter.js" --include "js/exporters.js" \
+            --include "js/srt.js" --include "js/merge.js" \
+            bash -c "node agent-skill/scripts/pipeline_test.js > /dev/null && node benchmark/run_benchmark.js --min-f1 0 > /dev/null"
+          node test/check_coverage.js
+
       - name: 导出编排 E2E（真实点击 TMX / SRT / SRT ZIP）
         run: bash test/run_e2e.sh
 
