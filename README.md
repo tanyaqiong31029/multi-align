@@ -80,7 +80,7 @@ node agent-skill/scripts/pipeline_test.js <目录>    # 测试其他副本
 
 1. **回归测试**：当前 43 项断言（数量以脚本输出为准），覆盖多语分句（缩写/小数/引号/有序列表标号）、对齐珠型、翻译单元合并、导出器 ZIP/XML 完整性与 openpyxl 打开校验、DOCX 导入、GBK 编码识别、SRT/VTT 字幕全链路、导出编排层与统计模块默认静默。其中 1 项为**环境可选检查**（DOCX 往返需要 python-docx）：缺库时自动跳过而非失败，CI 环境已安装故全量执行；
 2. **导出编排 E2E**：无头 Chrome 走完"导入字幕 → 对齐 → 导出"，真实点击 TMX / SRT / SRT ZIP 三条路径并断言下载触发（`bash test/run_e2e.sh`）；
-3. **金标准对齐基准**：内部小型回归集（自建用例、人工标注），15 个多语用例（中英 / 中日 / 英法 / 英德 / 英西）覆盖 1-1 / 1-2 / 2-1 句对变换、段落锚定、数字锚点、字幕时间轴锚点、学术结构（标题/列表/脚注上标）、OCR 轻噪声、错段兜底与 1800 句滑窗长文本；12 个计分用例**宏平均 F1 = 100%**（衡量"已声明能力不被改动破坏"，不代表公开大规模语料上的通用准确率），另有 3 个 xfail 用例如实标注长度模型的已知局限；CI 在计分用例 F1 < 97% 时拒绝合并。
+3. **金标准对齐基准**：内部小型回归集（自建用例、人工标注），15 个多语用例（中英 / 中日 / 英法 / 英德 / 英西）覆盖 1-1 / 1-2 / 2-1 句对变换、段落锚定、数字锚点、字幕时间轴锚点、学术结构（标题/列表/脚注上标）、OCR 轻噪声、错段兜底与 1800 句滑窗长文本；12 个计分用例**宏平均 F1 = 100%**（衡量"已声明能力不被改动破坏"，不代表公开大规模语料上的通用准确率），另有 3 个 xfail 用例如实标注长度模型的已知局限；包含 Tatoeba 真实公开语料用例（CC-BY 2.0 FR，100 对）；CI 在计分用例 F1 < 97% 时拒绝合并。核心模块设有覆盖率门槛（`test/check_coverage.js`，c8 统计）。
 
 ```bash
 node benchmark/run_benchmark.js --verbose   # 本地复跑基准，查看逐珠差异
@@ -122,6 +122,18 @@ python3 -m http.server 8000
 - 浏览器本地自动保存（localStorage），可一键恢复；`Ctrl+S` 随时导出工程 JSON 备份
 
 ## 引用
+
+**引用本项目**：
+
+```bibtex
+@misc{multialign2026,
+  title        = {MultiAlign: A Zero-Dependency Client-Side Workbench for Multilingual Sentence Alignment},
+  author       = {tanyaqiong31029},
+  year         = {2026},
+  howpublished = {\url{https://github.com/tanyaqiong31029/multi-align}},
+  note         = {Online demo: https://tanyaqiong31029.github.io/multi-align/}
+}
+```
 
 对齐算法基于：William A. Gale & Kenneth W. Church (1993). *A Program for Aligning Sentences in Bilingual Corpora*. Computational Linguistics 19(1):75–102.
 
