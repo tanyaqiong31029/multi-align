@@ -33,7 +33,7 @@ jobs:
       - name: 安装 Python 校验依赖（XLSX/DOCX 断言用）
         run: python3 -m pip install --quiet openpyxl python-docx
 
-      - name: 回归测试（分句/对齐/合并/导出/导入/SRT/统计，40 项断言）
+      - name: 回归测试（分句/对齐/合并/导出/导入/SRT/统计/编排；数量以脚本输出为准）
         run: node agent-skill/scripts/pipeline_test.js
 
       - name: 金标准对齐基准（宏平均 F1 ≥ 97%）

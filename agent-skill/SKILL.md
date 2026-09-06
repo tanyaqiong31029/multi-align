@@ -22,7 +22,7 @@ node agent-skill/scripts/pipeline_test.js          # 回归：分句/对齐/合�
 node benchmark/run_benchmark.js --min-f1 0.97      # 金标准基准：6 用例宏平均 F1 ≥ 97%（CI 同款）
 ```
 
-再跑导出编排 E2E（无头 Chrome 真实点击 TMX/SRT/SRT ZIP 下载路径）：`bash test/run_e2e.sh`（CI 同款）。三道全绿才继续（回归 40 项断言，含 SRT/VTT 字幕全链路、导出编排层与统计模块默认静默）。回归失败的排查顺序见下文"已知陷阱"；基准掉点先跑 `--verbose` 看逐珠差异（改 aligner 代价函数/罚分表时尤其要逐用例核对），能力边界与路线图见 `benchmark/README.md`。
+再跑导出编排 E2E（无头 Chrome 真实点击 TMX/SRT/SRT ZIP 下载路径）：`bash test/run_e2e.sh`（CI 同款）。三道全绿才继续（回归当前 43 项断言，含 1 项环境可选跳过，覆盖 SRT/VTT 字幕全链路、导出编排层与统计模块默认静默）。回归失败的排查顺序见下文"已知陷阱"；基准掉点先跑 `--verbose` 看逐珠差异（改 aligner 代价函数/罚分表时尤其要逐用例核对），能力边界与路线图见 `benchmark/README.md`。
 
 ## 架构速览
 
