@@ -1324,14 +1324,18 @@
         if (!zip) { toast('只有一个版本，无法生成两两 TMX', 'warn'); return; }
         U.download(base + '_两两TMX.zip', zip);
       } else if (kind === 'srt') {
-        if ((state.segs[state.pivotId] || [{}])[0].t0 === undefined) {
+        const hasTiming = (state.tus[0] || {}).t0 !== undefined ||
+          (state.segs[state.pivotId] || [{}])[0].t0 !== undefined;
+        if (!hasTiming) {
           toast('当前对齐无时间轴：请让基准语使用字幕文件（SRT/VTT）导入', 'warn'); return;
         }
         const groups = Exp.srtGroups(versions, rows);
         if (!groups.length) { toast('没有可导出的字幕行', 'warn'); return; }
         U.download(base + '_多语字幕.srt', new Blob([Exp.formatSrtGroups(groups)], { type: 'application/x-subrip;charset=utf-8' }));
       } else if (kind === 'srtzip') {
-        if ((state.segs[state.pivotId] || [{}])[0].t0 === undefined) {
+        const hasTimingZ = (state.tus[0] || {}).t0 !== undefined ||
+          (state.segs[state.pivotId] || [{}])[0].t0 !== undefined;
+        if (!hasTimingZ) {
           toast('当前对齐无时间轴：请让基准语使用字幕文件（SRT/VTT）导入', 'warn'); return;
         }
         const groups = Exp.srtGroups(versions, rows);
@@ -1357,14 +1361,7 @@
 
   /* ==================== 工程保存 / 自动保存 ==================== */
   function projectJSON() {
-    return {
-      app: 'multialign', v: 1, savedAt: Date.now(),
-      versions: state.versions,
-      pivotId: state.pivotId,
-      settings: state.settings,
-      tus: state.tus,
-      step: state.tus.length ? 3 : 1
-    };
+    return PA.Project.serialize(state);
   }
   function saveProjectFile() {
     if (!state.versions.length) { toast('当前工程为空', 'warn'); return; }
@@ -1376,12 +1373,13 @@
     const reader = new FileReader();
     reader.onload = () => {
       try {
-        const data = JSON.parse(reader.result);
-        if (!data || data.app !== 'multialign' || !Array.isArray(data.versions)) {
-          toast('不是有效的工程文件', 'err'); return;
-        }
-        loadProject(data);
-        toast('工程已打开：' + state.versions.length + ' 个版本' + (state.tus.length ? '，' + state.tus.length + ' 个翻译单元' : ''), 'ok');
+        const raw = JSON.parse(reader.result);
+        const norm = PA.Project.normalize(raw);
+        if (!norm.ok) { toast(norm.error, 'err'); return; }
+        loadProject(norm.data);
+        const cuesN = state.versions.filter(v => v.cues).length;
+        toast('工程已打开：' + state.versions.length + ' 个版本' + (state.tus.length ? '，' + state.tus.length + ' 个翻译单元' : '')
+          + (cuesN ? '，' + cuesN + ' 个字幕时间轴' : ''), 'ok');
       } catch (err) {
         toast('读取失败：' + (err && err.message || err), 'err');
       }
@@ -1391,7 +1389,8 @@
   }
   function loadProject(data) {
     state.versions = data.versions.map(v => ({
-      id: v.id || U.uid('v'), name: v.name || '版本', lang: v.lang || 'en', text: v.text || ''
+      id: v.id, name: v.name, lang: v.lang, text: v.text,
+      cues: v.cues || null  // 字幕时间轴恢复（此前被丢弃，重对齐后 SRT 导出失效）
     }));
     state.pivotId = data.pivotId && byId(data.pivotId) ? data.pivotId : (state.versions[0] && state.versions[0].id);
     state.settings = Object.assign({ usePara: true, splitSemi: false, lexWeight: 40, numWeight: 60, variance: 0, srtWeight: 80 }, data.settings || {});

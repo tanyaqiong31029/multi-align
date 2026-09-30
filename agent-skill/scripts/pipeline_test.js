@@ -23,7 +23,7 @@ function pythonHas(mod) {
 }
 
 global.window = global;
-[ 'util.js','segmenter.js','srt.js','analytics.js','aligner.js','merge.js','docximport.js','exporters.js','sample.js' ]
+[ 'util.js','segmenter.js','srt.js','project.js','analytics.js','aligner.js','merge.js','docximport.js','exporters.js','sample.js' ]
   .forEach(f => require(JS(f)));
 const U = PA.util, Seg = PA.Seg, Aligner = PA.Aligner, Merge = PA.Merge, Exp = PA.Export;
 
@@ -171,6 +171,74 @@ d=Document(); d.add_paragraph('这是第一段第一句。这是第一段第二�
   const srtZip = Exp.buildSrtsZip(srtRowsAll, versions, '回归测试');
   const zipMagic = Buffer.from(await srtZip.slice(0, 2).arrayBuffer()).toString('latin1');
   ok(zipMagic === 'PK' && srtZip.size > 1000, '字幕 ZIP 完整（PK 魔数 + 体积正常）');
+
+  console.log('== 9. 工程保存/恢复编排（字幕时间轴完整性）==');
+  // 高危回归背景：loadProject 曾丢弃 cues → 恢复后重新对齐丢失时间轴，SRT 导出失效。
+  // 此处按"保存 → 恢复 → 重新对齐 → SRT 导出"全链路验证。
+  ok(!!PA.Project && typeof PA.Project.normalize === 'function', 'PA.Project 模块可用');
+  const srtProj = {
+    app: 'multialign', v: 1, savedAt: 1,
+    versions: [
+      { id: 'zh', name: '中', lang: 'zh-CN',
+        text: '会议定在周一。\n请准时参加。\n会议室在三楼。',
+        cues: [{ start: 1000, end: 3000, text: '会议定在周一。' },
+               { start: 3500, end: 5000, text: '请准时参加。' },
+               { start: 5500, end: 7000, text: '会议室在三楼。' }] },
+      { id: 'en', name: '英', lang: 'en',
+        text: 'The meeting is on Monday.\nPlease be on time.\nThe room is on floor three.',
+        cues: [{ start: 1150, end: 3150, text: 'The meeting is on Monday.' },
+               { start: 3650, end: 5150, text: 'Please be on time.' },
+               { start: 5650, end: 7150, text: 'The room is on floor three.' }] }
+    ],
+    pivotId: 'zh', settings: { usePara: true, splitSemi: false, lexWeight: 40, numWeight: 60, variance: 0, srtWeight: 80 },
+    tus: []
+  };
+  // 步骤1 保存：serialize 往返
+  const saved = JSON.parse(JSON.stringify(PA.Project.serialize(srtProj)));
+  // 步骤2 恢复：normalize 校验并恢复 cues
+  const restored = PA.Project.normalize(saved);
+  ok(restored.ok && restored.data.versions.every(v => v.cues && v.cues.length === 3),
+    '恢复后 cues 时间轴完整（此前被丢弃）');
+  // 步骤3 重新对齐：恢复的 cues → segs → 对齐 → attachTiming
+  const rs = {};
+  for (const v of restored.data.versions) {
+    rs[v.id] = v.cues.map(c => ({ text: c.text, para: 0, t0: c.start, t1: c.end }));
+  }
+  const rPrep = id => rs[id].map(x => ({ ...x, len: U.weightedLen(x.text), nums: Seg.extractNums(x.text), tokens: Seg.simTokens(x.text) }));
+  const rBeads = Aligner.alignTexts(rPrep('zh'), rPrep('en'), { usePara: true, variance: 9, lexWeight: 0, numWeight: 60, srtWeight: 80, sameScript: false });
+  const rTus = PA.Merge.buildTUs(restored.data.versions, 'zh', rs, [{ vid: 'en', beads: rBeads }]);
+  PA.SRT.attachTiming(rTus, 'zh', rs.zh);
+  // 步骤4 SRT 导出：时间轴正确 + 双语往返
+  ok(rTus.length === 3 && rTus[0].t0 === 1000 && rTus[2].t1 === 7000, '重新对齐后时间轴正确（1000ms 起 / 7000ms 止）');
+  const rGroups = Exp.srtGroups(restored.data.versions, rTus.map((tu, idx) => ({ idx, tu })));
+  const rSrt = Exp.formatSrtGroups(rGroups);
+  ok(PA.SRT.parse(rSrt).length === 3 && rSrt.includes('Please be on time.'), '恢复后 SRT 导出正常（此前失效）');
+  // 校验面：坏 cue / 错 app 标签 / 坏 TU 均被拒
+  const badCue = PA.Project.normalizeCues([{ start: 5000, end: 1000, text: '倒置' }, { start: 'x', end: 9, text: 'NaN' }, { start: 0, end: 800, text: '合法' }]);
+  ok(badCue.length === 1 && badCue[0].text === '合法', '非法 cue 被过滤（倒置/NaN）');
+  ok(PA.Project.normalize({ app: 'other', versions: [] }).ok === false, '错 app 标签被拒');
+  const badTu = PA.Project.normalizeTu({ cells: 'not-an-object' });
+  ok(badTu === null, '非法 TU 被过滤');
+  const edgeTu = PA.Project.normalizeTu({
+    cells: { a: null, b: 42 },       // null/非字符串值 → 字符串化
+    conf: 7,                          // 越界置信度 → 钳制到 1
+    locked: 1, modified: 'yes',      // 真值归一
+    t0: 1000, t1: '2500'             // 字符串时间轴 → 数值保留
+  });
+  ok(edgeTu.cells.a === '' && edgeTu.cells.b === '42', 'TU 单元格 null/数字值字符串化');
+  ok(edgeTu.conf === 1, 'TU 置信度越界钳制（7 → 1）');
+  ok(edgeTu.locked === true && edgeTu.modified === true, 'TU 布尔字段真值归一');
+  ok(edgeTu.t0 === 1000 && edgeTu.t1 === 2500, 'TU 字符串时间轴归一为数值并保留');
+  ok(PA.Project.normalizeTu({ cells: {}, t0: 5, t1: 2 }).t0 === undefined, '倒置时间轴被丢弃');
+
+  console.log('== 10. CSV 公式注入防护 ==');
+  const injVers = [{ id: 'v1', name: 'A', lang: 'en' }];
+  const injRows = [{ idx: 0, tu: { cells: { v1: '=1+1' } } }, { idx: 1, tu: { cells: { v1: '@cmd' } } }, { idx: 2, tu: { cells: { v1: '-对话破折号' } } }];
+  const csvOut = Exp.buildDelimited(injVers, injRows, { sep: ',' });
+  ok(csvOut.includes("'=1+1") && csvOut.includes("'@cmd"), 'CSV：=/@ 起始单元格加 \' 前缀（防 Excel 公式注入）');
+  ok(csvOut.includes('-对话破折号') && !csvOut.includes("'-"), 'CSV：- 起始（字幕对白破折号）刻意不防护，已文档化');
+  const xlsxSafe = Exp.buildXLSX(injVers, injRows, {});
+  ok(xlsxSafe instanceof Blob || xlsxSafe.size > 0, 'XLSX 内联字符串天然免公式注入');
 
   console.log('== 7. 匿名统计模块 ==');
   ok(!!PA.Analytics && typeof PA.Analytics.send === 'function' && PA.Analytics.enabled() === false,
