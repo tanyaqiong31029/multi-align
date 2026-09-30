@@ -192,7 +192,11 @@ PA.Export = (function () {
   /* ---------- CSV / TSV / TXT ---------- */
   function csvField(s, sep) {
     s = String(s == null ? '' : s);
-    if (sep === '\t') return s.replace(/\t/g, ' ').replace(/\r?\n/g, ' ');
+    if (sep === '\t') s = s.replace(/\t/g, ' ').replace(/\r?\n/g, ' ');
+    // Excel/LibreOffice 公式注入防护（OWASP）：以 = + @ 或制表/回车开头的单元格
+    // 加 ' 前缀。刻意不防护 '-'：字幕对白常以 "- " 开头，加前缀破坏内容（残余
+    // 风险已记入 SECURITY.md）。XLSX 的 inline string 不经此路径（Excel 不求值）。
+    if (sep !== '\t' && /^[=+@\t\r]/.test(s)) s = "'" + s;
     if (/[",\n\r]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
     return s;
   }
