@@ -1303,7 +1303,8 @@
           ],
           []
         ]
-      ]
+      ],
+      "xfailMinF1": 0.3
     },
     {
       "id": "en-fr-mid-omission",
@@ -1397,7 +1398,8 @@
             "6"
           ]
         ]
-      ]
+      ],
+      "xfailMinF1": 0.6
     },
     {
       "id": "en-de-num-omission",
@@ -1481,7 +1483,8 @@
             "5"
           ]
         ]
-      ]
+      ],
+      "xfailMinF1": 0.55
     },
     {
       "id": "zh-en-long-1800",

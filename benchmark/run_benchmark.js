@@ -115,6 +115,9 @@ for (const c of gold.cases) {
   if (c.xfail) {
     r.xfail = true;
     r.xpass = F1 >= 0.999;
+    // 退化下限：已知局限不等于可以无限劣化（审查意见）。跌破下限视为回归失败。
+    r.floor = c.xfailMinF1 || 0;
+    r.floorBreach = F1 < r.floor;
   } else {
     sumP += P; sumR += R; nScored++;
   }
@@ -135,7 +138,7 @@ if (AS_JSON) {
     if (r.status !== 'ok') {
       console.log(`✗ ${r.id.padEnd(22)} [分句失败] ${r.detail}`);
     } else if (r.xfail && !r.xpass) {
-      console.log(`⊘ ${r.id.padEnd(22)} [xfail 预期内] F1=${(r.f1 * 100).toFixed(1)}% — ${r.note || ''}`);
+      console.log(`⊘ ${r.id.padEnd(22)} [xfail 预期内] F1=${(r.f1 * 100).toFixed(1)}%（下限 ${(r.floor * 100).toFixed(0)}%）— ${r.note || ''}`);
     } else if (r.xfail && r.xpass) {
       console.log(`⚡ ${r.id.padEnd(22)} [XPASS！已能解决，请移除 xfail 标注] F1=100.0%`);
     } else {
@@ -149,9 +152,12 @@ if (AS_JSON) {
   }
   const xfailN = results.filter(r => r.xfail && !r.xpass).length;
   const xpassN = results.filter(r => r.xpass).length;
-  console.log(`\n总体（宏平均，不含 xfail）：P=${(overall.precision * 100).toFixed(1)}%  R=${(overall.recall * 100).toFixed(1)}%  F1=${(overall.f1 * 100).toFixed(1)}%  |  分句失败 ${segFails} 例  xfail 预期内 ${xfailN} 例` + (xpassN ? `  XPASS ${xpassN} 例 ⚡` : ''));
+  const breaches = results.filter(r => r.floorBreach);
+  console.log(`\n总体（宏平均，不含 xfail）：P=${(overall.precision * 100).toFixed(1)}%  R=${(overall.recall * 100).toFixed(1)}%  F1=${(overall.f1 * 100).toFixed(1)}%  |  分句失败 ${segFails} 例  xfail 预期内 ${xfailN} 例` + (xpassN ? `  XPASS ${xpassN} 例 ⚡` : '') + (breaches.length ? `  跌破下限 ${breaches.length} 例 ✗` : ''));
+  if (breaches.length) breaches.forEach(r => console.error(`  ✗ ${r.id} F1=${(r.f1 * 100).toFixed(1)}% 低于退化下限 ${(r.floor * 100).toFixed(0)}%`));
   if (MIN_F1 !== null) console.log(`阈值：F1 ≥ ${(MIN_F1 * 100).toFixed(1)}% → ${overall.f1 >= MIN_F1 && segFails === 0 ? '通过' : '未通过'}`);
   console.log('');
 }
 
-process.exit(segFails > 0 || (MIN_F1 !== null && overall.f1 < MIN_F1) ? 1 : 0);
+const floorBreaches = results.filter(r => r.floorBreach).length;
+process.exit(segFails > 0 || (MIN_F1 !== null && overall.f1 < MIN_F1) || floorBreaches > 0 ? 1 : 0);
