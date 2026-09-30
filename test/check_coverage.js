@@ -3,7 +3,8 @@
 /* 核心模块覆盖率门槛检查（配合 c8 的 json-summary 报告）
  * 用法：npx c8 --reporter=json-summary --include "js/…" <测试命令> && node test/check_coverage.js
  * 阈值标定于 2026-09（回归 43 断言 + 基准 16 用例合并运行），低于阈值即失败。
- * 注意：app.js / sample.js / analytics.js 不在门槛内（前者为 UI 层，由 E2E 覆盖）。
+ * 注意：app.js / sample.js / analytics.js 不在门槛内（前者为 UI 层，由 E2E 与
+ * project.js 的抽离测试共同覆盖——工程序列化/校验已抽入 project.js）。
  */
 const fs = require('fs');
 
@@ -14,6 +15,7 @@ const THRESHOLDS = {
   'merge.js': 80,
   'segmenter.js': 90,
   'srt.js': 95,
+  'project.js': 95,
 };
 
 const summaryFile = 'coverage/coverage-summary.json';
