@@ -5,6 +5,8 @@
 PA.Export = (function () {
   const U = PA.util;
   const crc32 = PA.crc32;
+  // 与 package.json 的 version 保持一致（回归测试会校验）
+  const TOOL_VERSION = '1.1.0';
 
   function xmlEsc(s) {
     return String(s == null ? '' : s)
@@ -19,7 +21,7 @@ PA.Export = (function () {
     const srclang = o.srclang || 'en';
     let out = '<?xml version="1.0" encoding="UTF-8"?>\n';
     out += '<tmx version="1.4">\n';
-    out += '  <header creationtool="MultiAlign 多语对齐工作台" creationtoolversion="1.0" segtype="sentence"';
+    out += '  <header creationtool="MultiAlign 多语对齐工作台" creationtoolversion="' + TOOL_VERSION + '" segtype="sentence"';
     out += ' o-tmf="multialign" adminlang="zh-CN" srclang="' + xmlEsc(srclang) + '" datatype="plaintext"';
     out += ' o-filename="' + xmlEsc(o.filename || 'corpus') + '"/>\n';
     out += '  <body>\n';
@@ -192,11 +194,15 @@ PA.Export = (function () {
   /* ---------- CSV / TSV / TXT ---------- */
   function csvField(s, sep) {
     s = String(s == null ? '' : s);
-    if (sep === '\t') s = s.replace(/\t/g, ' ').replace(/\r?\n/g, ' ');
     // Excel/LibreOffice 公式注入防护（OWASP）：以 = + @ 或制表/回车开头的单元格
-    // 加 ' 前缀。刻意不防护 '-'：字幕对白常以 "- " 开头，加前缀破坏内容（残余
-    // 风险已记入 SECURITY.md）。XLSX 的 inline string 不经此路径（Excel 不求值）。
-    if (sep !== '\t' && /^[=+@\t\r]/.test(s)) s = "'" + s;
+    // 加 ' 前缀（CSV 与 TSV 均防护，见 SECURITY.md）。刻意不防护 '-'：字幕对白常以
+    // "- " 开头，加前缀破坏内容（残余风险已记入 SECURITY.md）。
+    // XLSX 的 inline string 不经此路径（Excel 不求值）。
+    if (/^[=+@\t\r]/.test(s)) s = "'" + s;
+    if (sep !== ',') {
+      // TSV：无引号转义约定，字段内的制表符/换行替换为空格，保持行列结构
+      return s.replace(/\r\n|[\t\r\n]/g, ' ');
+    }
     if (/[",\n\r]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
     return s;
   }
@@ -216,10 +222,22 @@ PA.Export = (function () {
     return rows.map(r => versions.map(v => (r.tu.cells[v.id] || '').trim()).join('\t')).join('\n');
   }
 
+  /* ZIP 条目名去重：同名版本会生成重复文件名（解压时互相覆盖），追加 _2/_3… 序号 */
+  function uniqueName(name, used) {
+    const dot = name.lastIndexOf('.');
+    const stem = dot > 0 ? name.slice(0, dot) : name;
+    const ext = dot > 0 ? name.slice(dot) : '';
+    let out = name, n = 2;
+    while (used.has(out.toLowerCase())) out = stem + '_' + (n++) + ext;
+    used.add(out.toLowerCase());
+    return out;
+  }
+
   /* 两两双语 TMX 打包（基准语 × 每个其他版本） */
   function buildPairwiseZip(versions, pivotId, rows, o) {
     const pivot = versions.find(v => v.id === pivotId) || versions[0];
     const files = [];
+    const used = new Set();
     versions.forEach(v => {
       if (v.id === pivot.id) return;
       const pairVers = [pivot, v];
@@ -229,7 +247,7 @@ PA.Export = (function () {
         srclang: pivot.lang, includeConf: o.includeConf,
         filename: o.filename + '_' + U.sanitizeName(pivot.name) + '-' + U.sanitizeName(v.name)
       });
-      files.push({ name: U.sanitizeName(pivot.name) + '-' + U.sanitizeName(v.name) + '.tmx', data: tmx });
+      files.push({ name: uniqueName(U.sanitizeName(pivot.name) + '-' + U.sanitizeName(v.name) + '.tmx', used), data: tmx });
     });
     if (!files.length) return null;
     return makeZip(files);
@@ -259,16 +277,17 @@ PA.Export = (function () {
   /* 多语合并字幕 + 各语言单语字幕，打包 ZIP */
   function buildSrtsZip(groups, versions, base) {
     const name = U.sanitizeName(base);
-    const files = [{ name: name + '_多语字幕.srt', data: formatSrtGroups(groups) }];
+    const used = new Set();
+    const files = [{ name: uniqueName(name + '_多语字幕.srt', used), data: formatSrtGroups(groups) }];
     versions.forEach((v, i) => {
       const mono = groups.map(g => ({ t0: g.t0, t1: g.t1, lines: [g.lines[i]] }));
-      files.push({ name: name + '_' + U.sanitizeName(v.name) + '.srt', data: formatSrtGroups(mono) });
+      files.push({ name: uniqueName(name + '_' + U.sanitizeName(v.name) + '.srt', used), data: formatSrtGroups(mono) });
     });
     return makeZip(files);
   }
 
   return {
     xmlEsc, buildTMX, makeZip, buildXLSX, buildDelimited, buildTXT, buildPairwiseZip,
-    srtGroups, formatSrtGroups, buildSrtsZip
+    srtGroups, formatSrtGroups, buildSrtsZip, uniqueName, TOOL_VERSION
   };
 })();

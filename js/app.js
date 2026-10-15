@@ -296,9 +296,9 @@
 
   function cardHTML(v, i) {
     const opts = Seg.LANGS.map(l =>
-      '<option value="' + l.code + '"' + (l.code === v.lang ? ' selected' : '') + '>' + esc(l.name) + '</option>').join('');
+      '<option value="' + esc(l.code) + '"' + (l.code === v.lang ? ' selected' : '') + '>' + esc(l.name) + '</option>').join('');
     const isPivot = v.id === state.pivotId;
-    return '<div class="vcard" data-vid="' + v.id + '">' +
+    return '<div class="vcard" data-vid="' + esc(v.id) + '">' +
       '<div class="vcard-head">' +
       '<span class="col-dot" style="background:' + colColor(v.id) + '"></span>' +
       '<input class="vname" value="' + esc(v.name) + '" placeholder="版本名称" maxlength="30">' +
@@ -766,7 +766,7 @@
       inner = esc(text);
     }
     const sel = state.selectedCell && state.selectedCell.rid === rid && state.selectedCell.vid === vid ? ' cell-sel' : '';
-    return '<td class="cell' + sel + '" data-vid="' + vid + '" contenteditable="' + (state.search ? 'false' : 'true') +
+    return '<td class="cell' + sel + '" data-vid="' + esc(vid) + '" contenteditable="' + (state.search ? 'false' : 'true') +
       '" spellcheck="false">' + inner + '</td>';
   }
 
@@ -789,12 +789,12 @@
     const ths = ['<th class="c-num">#</th>'].concat(vis.map(v => {
       const g = Seg.langInfo(v.lang);
       const isP = v.id === state.pivotId;
-      return '<th class="col-v" data-vid="' + v.id + '"><div class="col-head">' +
+      return '<th class="col-v" data-vid="' + esc(v.id) + '"><div class="col-head">' +
         '<span class="col-dot" style="background:' + colColor(v.id) + '"></span>' +
         '<span class="col-name" title="' + esc(v.name) + '">' + esc(v.name) + '</span>' +
         '<span class="col-lang">' + esc(g.name) + '</span>' +
         (isP ? '<span class="badge-pivot">基准</span>' : '') +
-        '<button class="icon-btn col-hide" data-vid="' + v.id + '" title="隐藏此列">✕</button>' +
+        '<button class="icon-btn col-hide" data-vid="' + esc(v.id) + '" title="隐藏此列">✕</button>' +
         '</div></th>';
     })).concat(['<th class="c-conf">置信</th>', '<th class="c-lock">锁</th>']);
     el.eThead.innerHTML = '<tr>' + ths.join('') + '</tr>';
@@ -889,7 +889,7 @@
 
   function renderColsPanel() {
     el.colsPanel.innerHTML = '<div class="cols-title">显示列</div>' + state.versions.map(v =>
-      '<label class="cols-item"><input type="checkbox" data-vid="' + v.id + '"' + (state.hiddenCols.has(v.id) ? '' : ' checked') + '> ' +
+      '<label class="cols-item"><input type="checkbox" data-vid="' + esc(v.id) + '"' + (state.hiddenCols.has(v.id) ? '' : ' checked') + '> ' +
       '<span class="col-dot" style="background:' + colColor(v.id) + '"></span>' + esc(v.name) + '</label>').join('');
     el.colsPanel.querySelectorAll('input[type=checkbox]').forEach(cb => {
       cb.addEventListener('change', () => {
@@ -1119,7 +1119,7 @@
   function openSearch() {
     if (!state.tus.length) { toast('暂无可搜索内容', 'warn'); return; }
     el.searchScope.innerHTML = '<option value="all">所有列</option>' +
-      state.versions.map(v => '<option value="' + v.id + '">' + esc(v.name) + '</option>').join('');
+      state.versions.map(v => '<option value="' + esc(v.id) + '">' + esc(v.name) + '</option>').join('');
     if (state.search) {
       el.searchTerm.value = state.search.term;
       el.searchReplace.value = '';
@@ -1410,19 +1410,33 @@
   const autosaveSoon = U.debounce(autosave, 4000);
   function checkAutosave() {
     let data = null;
-    try { data = JSON.parse(localStorage.getItem(LS_KEY) || 'null'); } catch (e) { }
-    if (!data || !Array.isArray(data.versions) || !data.versions.length) return;
-    const t = new Date(data.savedAt || Date.now());
+    try { data = JSON.parse(localStorage.getItem(LS_KEY) || 'null'); } catch (e) { data = null; }
+    if (!data) return;
+    // 自动保存与工程文件同等不可信：先经 PA.Project.normalize 校验归一（id 白名单等），
+    // 损坏/非法的自动保存直接丢弃，不再弹恢复横幅。
+    let norm = null;
+    try { norm = PA.Project.normalize(data); } catch (e) { norm = null; }
+    if (!norm || !norm.ok) {
+      try { localStorage.removeItem(LS_KEY); } catch (e) { }
+      return;
+    }
+    const nd = norm.data;
+    const t = new Date(+data.savedAt || Date.now());
     el.restoreBanner.innerHTML =
-      '<span>检测到自动保存的工程（' + t.toLocaleString('zh-CN') + '，' + data.versions.length + ' 个版本' +
-      (data.tus && data.tus.length ? '，' + data.tus.length + ' 个翻译单元' : '') + '）</span>' +
+      '<span>检测到自动保存的工程（' + esc(t.toLocaleString('zh-CN')) + '，' + nd.versions.length + ' 个版本' +
+      (nd.tus.length ? '，' + nd.tus.length + ' 个翻译单元' : '') + '）</span>' +
       '<button class="btn btn-sm btn-primary" id="btnRestore">恢复</button>' +
       '<button class="btn btn-sm" id="btnDiscard">忽略</button>';
     el.restoreBanner.classList.add('banner-on');
     E('btnRestore').addEventListener('click', () => {
-      loadProject(data);
       el.restoreBanner.classList.remove('banner-on');
-      toast('已恢复上次工程');
+      try {
+        loadProject(nd);
+        toast('已恢复上次工程');
+      } catch (err) {
+        toast('自动保存已损坏，无法恢复：' + (err && err.message || err), 'err');
+        try { localStorage.removeItem(LS_KEY); } catch (e) { }
+      }
     });
     E('btnDiscard').addEventListener('click', () => {
       el.restoreBanner.classList.remove('banner-on');
