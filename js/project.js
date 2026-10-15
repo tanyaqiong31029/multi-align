@@ -6,7 +6,15 @@
 PA.Project = (function () {
 
   var APP_TAG = 'multialign';
+  var ID_RE = /^[A-Za-z0-9_-]{1,32}$/;
+  var LANG_RE = /^[A-Za-z]{2,3}(-[A-Za-z0-9]{1,8}){0,3}$/;
   var SETTINGS_DEFAULTS = { usePara: true, splitSemi: false, lexWeight: 40, numWeight: 60, variance: 0, srtWeight: 80 };
+
+  function freshId(used) {
+    var id;
+    do { id = 'v' + Math.random().toString(36).slice(2, 10); } while (used[id] || !ID_RE.test(id));
+    return id;
+  }
 
   /* cues 校验：数组、每项 {start,end,text}、start<end、毫秒数字；按开始时间排序 */
   function normalizeCues(cues) {
@@ -47,20 +55,27 @@ PA.Project = (function () {
       return { ok: false, error: '不是有效的工程文件' };
     }
     var versions = [];
+    var idMap = {};   // 原始 id → 归一后 id（非法/重复 id 重新生成后，用于重映射 pivotId 与 TU cells）
+    var used = {};
     for (var i = 0; i < data.versions.length && versions.length < 10; i++) {
       var v = data.versions[i];
       if (!v || typeof v !== 'object') continue;
+      // 安全：id 会进入 innerHTML 属性（data-vid / option value），只接受安全字符集，
+      // 否则（含 "><img onerror> 之类）重新生成唯一 id，杜绝工程文件/自动保存 XSS。
+      var id = typeof v.id === 'string' && ID_RE.test(v.id) && !used[v.id] ? v.id : freshId(used);
+      used[id] = true;
+      if (typeof v.id === 'string' && !Object.prototype.hasOwnProperty.call(idMap, v.id)) idMap[v.id] = id;
       versions.push({
-        id: typeof v.id === 'string' && v.id ? v.id.slice(0, 32) : 'v' + i + Math.random().toString(36).slice(2, 6),
+        id: id,
         name: String(v.name == null ? '' : v.name).slice(0, 30) || '版本' + (versions.length + 1),
-        lang: typeof v.lang === 'string' && v.lang ? v.lang : 'en',
+        lang: typeof v.lang === 'string' && LANG_RE.test(v.lang) ? v.lang : 'en',
         text: String(v.text == null ? '' : v.text),
         cues: normalizeCues(v.cues)
       });
     }
     if (!versions.length) return { ok: false, error: '工程中没有可用版本' };
-    var pivotId = typeof data.pivotId === 'string' && versions.some(function (v) { return v.id === data.pivotId; })
-      ? data.pivotId : versions[0].id;
+    var pivotId = typeof data.pivotId === 'string' && Object.prototype.hasOwnProperty.call(idMap, data.pivotId)
+      ? idMap[data.pivotId] : versions[0].id;
     var settings = {};
     for (var k in SETTINGS_DEFAULTS) {
       if (Object.prototype.hasOwnProperty.call(SETTINGS_DEFAULTS, k)) {
@@ -73,6 +88,16 @@ PA.Project = (function () {
     settings.splitSemi = typeof data.settings === 'object' && data.settings
       ? !!data.settings.splitSemi : SETTINGS_DEFAULTS.splitSemi;
     var tus = Array.isArray(data.tus) ? data.tus.map(normalizeTu).filter(Boolean) : [];
+    // 被重新生成的 id：把 TU cells 的键同步重映射，避免内容"消失"
+    tus.forEach(function (tu) {
+      var cells = {};
+      for (var key in tu.cells) {
+        if (Object.prototype.hasOwnProperty.call(tu.cells, key) && Object.prototype.hasOwnProperty.call(idMap, key)) {
+          cells[idMap[key]] = tu.cells[key];
+        }
+      }
+      tu.cells = cells;
+    });
     return {
       ok: true,
       data: { versions: versions, pivotId: pivotId, settings: settings, tus: tus },
@@ -93,5 +118,5 @@ PA.Project = (function () {
     };
   }
 
-  return { normalize: normalize, normalizeCues: normalizeCues, normalizeTu: normalizeTu, serialize: serialize, APP_TAG: APP_TAG };
+  return { normalize: normalize, normalizeCues: normalizeCues, normalizeTu: normalizeTu, serialize: serialize, APP_TAG: APP_TAG, ID_RE: ID_RE };
 })();

@@ -240,6 +240,57 @@ d=Document(); d.add_paragraph('这是第一段第一句。这是第一段第二�
   const xlsxSafe = Exp.buildXLSX(injVers, injRows, {});
   ok(xlsxSafe instanceof Blob || xlsxSafe.size > 0, 'XLSX 内联字符串天然免公式注入');
 
+  ok(csvOut.split('\r\n')[1] === "1,'=1+1", 'CSV：无特殊字符字段不加引号');
+  const tsvRows = [{ idx: 0, tu: { cells: { v1: '=HYPERLINK("x")' } } }, { idx: 1, tu: { cells: { v1: '+1\tA, "b"\nC' } } }];
+  const tsvOut = Exp.buildDelimited(injVers, tsvRows, { sep: '\t' });
+  const tsvLines = tsvOut.split('\r\n');
+  ok(tsvLines[1] === "1\t'=HYPERLINK(\"x\")", 'TSV：= 起始加 \' 前缀且不套 CSV 引号 → ' + JSON.stringify(tsvLines[1]));
+  ok(tsvLines.length === 3 && tsvLines[2] === "2\t'+1 A, \"b\" C", 'TSV：字段内制表/换行替换为空格、逗号与引号原样 → ' + JSON.stringify(tsvLines[2]));
+  ok(tsvLines.every(l => l.split('\t').length === 2), 'TSV：每行列数一致');
+
+  console.log('== 11. 工程 id 白名单（XSS 防护） ==');
+  const xssId = '"><img src=x onerror=alert(1)>';
+  const xssProj = PA.Project.normalize({
+    app: 'multialign',
+    versions: [
+      { id: xssId, name: 'A', lang: 'en', text: 'a' },
+      { id: 'ok_id-1', name: 'B', lang: '"><svg onload=1>', text: 'b' },
+      { id: 'ok_id-1', name: 'C', lang: 'fr', text: 'c' },          // 重复 id
+      { id: 'x'.repeat(33), name: 'D', lang: 'de', text: 'd' },       // 超长
+      { id: 42, name: 'E', lang: 'ja', text: 'e' }                    // 非字符串
+    ],
+    pivotId: xssId,
+    tus: [{ cells: { [xssId]: '甲', 'ok_id-1': '乙', bogus: '丙' } }]
+  });
+  ok(xssProj.ok, '含恶意 id 的工程仍可打开');
+  const xIds = xssProj.data.versions.map(v => v.id);
+  ok(xIds.every(id => /^[A-Za-z0-9_-]{1,32}$/.test(id)), '所有 id 符合白名单 → ' + JSON.stringify(xIds));
+  ok(new Set(xIds).size === xIds.length, '重复 id 被重新生成为唯一 id');
+  ok(xIds[1] === 'ok_id-1' && xIds[0] !== xssId, '合法 id 保留、非法 id 替换');
+  ok(xssProj.data.pivotId === xIds[0], 'pivotId 随非法 id 重映射');
+  ok(xssProj.data.tus[0].cells[xIds[0]] === '甲' && xssProj.data.tus[0].cells['ok_id-1'] === '乙' &&
+     !('bogus' in xssProj.data.tus[0].cells) && !(xssId in xssProj.data.tus[0].cells), 'TU cells 键随 id 重映射、未知键丢弃');
+  ok(xssProj.data.versions[1].lang === 'en' && xssProj.data.versions[2].lang === 'fr', '非法语言代码回落为 en');
+
+  console.log('== 12. ZIP 条目名去重 / TMX 版本号 ==');
+  const zipNames = async blob => {
+    const b = Buffer.from(await blob.arrayBuffer()), names = [];
+    for (let i = 0; i + 30 <= b.length && b.readUInt32LE(i) === 0x04034b50;) {
+      const nl = b.readUInt16LE(26 + i), sz = b.readUInt32LE(18 + i);
+      names.push(b.slice(i + 30, i + 30 + nl).toString('utf8'));
+      i += 30 + nl + sz;
+    }
+    return names;
+  };
+  const dupVers = [{ id: 'p', name: '中', lang: 'zh-CN' }, { id: 'a', name: 'EN', lang: 'en' }, { id: 'b', name: 'EN', lang: 'en' }, { id: 'c', name: 'en', lang: 'en' }];
+  const dupRows = [{ idx: 0, tu: { cells: { p: '一', a: 'one', b: 'one', c: 'one' }, t0: 0, t1: 1000 } }];
+  const pzNames = await zipNames(Exp.buildPairwiseZip(dupVers, 'p', dupRows, { filename: 'x' }));
+  ok(pzNames.length === 3 && new Set(pzNames.map(n => n.toLowerCase())).size === 3, '两两 TMX ZIP：同名版本条目名唯一 → ' + JSON.stringify(pzNames));
+  const szNames = await zipNames(Exp.buildSrtsZip(Exp.srtGroups(dupVers, dupRows), dupVers, 'demo'));
+  ok(szNames.length === 5 && new Set(szNames.map(n => n.toLowerCase())).size === 5, '字幕 ZIP：同名版本条目名唯一 → ' + JSON.stringify(szNames));
+  const pkgVer = JSON.parse(fs.readFileSync(path.join(TOOL_DIR, 'package.json'), 'utf8')).version;
+  ok(Exp.buildTMX(dupVers, dupRows, {}).includes('creationtoolversion="' + pkgVer + '"'), 'TMX creationtoolversion 与 package.json 一致（' + pkgVer + '）');
+
   console.log('== 7. 匿名统计模块 ==');
   ok(!!PA.Analytics && typeof PA.Analytics.send === 'function' && PA.Analytics.enabled() === false,
     '默认关闭：ENDPOINT 为空时不发出任何请求');
